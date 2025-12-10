@@ -1,323 +1,172 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="UTF-8">
 <title>Invoice — Refit Maintenance Services</title>
 <style>
-  :root{--accent:#c94b6d;--muted:#666}
-  body{font-family:Arial,Helvetica,sans-serif;background:#f5f7f9;margin:0;color:#222}
-  .app{max-width:1100px;margin:28px auto;padding:18px}
-  .card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(20,30,40,0.06);margin-bottom:12px}
-  h1{margin:0 0 6px;color:var(--accent);font-size:20px}
-  label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
-  input,textarea,select{width:100%;padding:8px;border:1px solid #e6e9eb;border-radius:6px;font-size:14px;box-sizing:border-box}
-  .row{display:flex;gap:12px}
-  .col{flex:1}
-  .small{font-size:13px;color:var(--muted)}
-  .items-table{width:100%;border-collapse:collapse;margin-top:8px}
-  .items-table th,.items-table td{padding:8px;border-bottom:1px solid #efefef;text-align:left}
-  .items-table th{background:#fafafa}
-  .btn{display:inline-block;padding:8px 12px;border-radius:6px;border:0;cursor:pointer;font-weight:700}
-  .btn-accent{background:var(--accent);color:#fff}
-  .btn-ghost{background:#fff;border:1px solid #ddd}
-  .right{text-align:right}
-  .invoice-preview{background:#fff;padding:18px;border-radius:8px;margin-top:12px}
-  .invoice-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-  .logo-preview{max-height:64px}
-  @media print{ .no-print{display:none} .app{margin:0;padding:0} }
+    :root {
+        --bg: #ffffff;
+        --text: #000000;
+        --card: #f7f7f7;
+        --accent: #dfe7fd;
+    }
+    body.dark {
+        --bg: #1e1e1e;
+        --text: #f5f5f5;
+        --card: #2c2c2c;
+        --accent: #3b3b3b;
+    }
+
+    /* 12 pastel themes */
+    body.theme1 { --accent: #FDE2E4; }
+    body.theme2 { --accent: #FFF1E6; }
+    body.theme3 { --accent: #F0EFEB; }
+    body.theme4 { --accent: #DFE7FD; }
+    body.theme5 { --accent: #E2ECE9; }
+    body.theme6 { --accent: #F9E5C8; }
+    body.theme7 { --accent: #F6DFEB; }
+    body.theme8 { --accent: #E8F3D6; }
+    body.theme9 { --accent: #DDF1F0; }
+    body.theme10 { --accent: #FCE2CE; }
+    body.theme11 { --accent: #E6E6FA; }
+    body.theme12 { --accent: #E0FFD1; }
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: var(--bg);
+        color: var(--text);
+        transition: 0.3s;
+    }
+    .header {
+        display: flex; justify-content: space-between; align-items: center;
+        background: var(--accent);
+        padding: 15px;
+        border-radius: 10px;
+    }
+    .header img { max-height: 80px; }
+    h1 { margin-bottom: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 10px; text-align: left; background: var(--card); }
+    .right { text-align: right; }
+    .no-border { border: none !important; background: none !important; }
+
+    .controls {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    select, button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #888;
+        cursor: pointer;
+    }
 </style>
 </head>
-<body>
-  <div class="app">
-    <div class="row" style="align-items:center;justify-content:space-between">
-      <div>
-        <h1>Invoice Generator — Refit Maintenance Services</h1>
-        <div class="small">SSM Reg No: 201803348973 • Sole proprietorship</div>
-      </div>
-      <div class="no-print">
-        <button class="btn btn-accent" id="btnPreview">Preview / Print</button>
-        <button class="btn btn-ghost" id="btnExportJSON">Export e-Invoice JSON</button>
-      </div>
+
+<body class="theme1">
+
+<div class="controls">
+    <button onclick="toggleMode()">🌗 Day/Night</button>
+
+    <select id="themeChanger" onchange="changeTheme()">
+        <option value="theme1">Pastel Pink</option>
+        <option value="theme2">Cream</option>
+        <option value="theme3">Beige</option>
+        <option value="theme4">Soft Lavender Blue</option>
+        <option value="theme5">Mint Green</option>
+        <option value="theme6">Warm Sand</option>
+        <option value="theme7">Rose Blush</option>
+        <option value="theme8">Light Sage</option>
+        <option value="theme9">Aqua Soft</option>
+        <option value="theme10">Peach Cream</option>
+        <option value="theme11">Lilac Soft</option>
+        <option value="theme12">Pastel Green</option>
+    </select>
+</div>
+
+<div class="header">
+    <div>
+        <h2>Refit Maintenance Services</h2>
+        <p>
+            <strong>SSM Reg No:</strong> 201803348973 (Sole Proprietorship)<br>
+            <strong>Tax Ref No (OG):</strong> 10451781060<br>
+            C-08-34, Centum @ Oasis Corporate Park,<br>
+            Oasis Damansara, No. 2, Jalan PJU 1A/2,<br>
+            Ara Damansara, 47301 Petaling Jaya,<br>
+            Selangor Darul Ehsan, Malaysia<br>
+            <strong>Phone:</strong> +6012-2145922<br>
+            <strong>Email:</strong> lyodengck@gmail.com<br>
+            <strong>Bank (RHB):</strong> 21261100023558
+        </p>
     </div>
 
-    <div class="card">
-      <div style="display:flex;gap:12px;align-items:flex-start">
-        <div style="flex:1">
-          <label>Seller (pre-filled)</label>
-          <input id="sellerName" value="Refit Maintenance Services"/>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="sellerReg" placeholder="SSM Reg No" value="201803348973"/>
-            <input id="sellerTIN" placeholder="Seller TIN (leave blank if none)"/>
-          </div>
-          <textarea id="sellerAddress" rows="3" style="margin-top:8px">C-08-34, Centum @ Oasis Corporate Park
-Oasis Damansara
-No. 2, Jalan PJU 1A/2, Ara Damansara
-47301 Petaling Jaya
-Selangor Darul Ehsan
-West Malaysia</textarea>
-          <div class="row" style="margin-top:8px">
-            <input id="sellerPhone" placeholder="Phone / Email"/>
-            <input id="sellerEmail" placeholder="Email"/>
-          </div>
-          <label style="margin-top:10px">Bank details</label>
-          <div class="row">
-            <input id="bankName" value="RHB Bank"/>
-            <input id="bankAcc" value="21261100023558"/>
-          </div>
-        </div>
+    <img src="CB93A44D-3626-47FE-9844-926D465D083E.jpeg" alt="Company Logo">
+</div>
 
-        <div style="width:340px">
-          <label>Invoice details</label>
-          <input id="invoiceNumber" value="INV-2025-221"/>
-          <div class="row" style="margin-top:8px">
-            <input id="invoiceDate" type="date" value="">
-            <input id="dueDate" type="date" value="">
-          </div>
+<h1>INVOICE</h1>
 
-          <label>Document & e-Invoice fields</label>
-          <select id="documentType"><option>INVOICE</option><option>CREDIT_NOTE</option></select>
-          <input id="currency" value="MYR" style="margin-top:8px"/>
-          <input id="uuid" placeholder="UUID (MyInvois will return)"/>
-          <input id="lhdnTs" placeholder="LHDN Validation Timestamp (returned after validation)"/>
+<table>
+    <tr>
+        <td class="no-border">
+            <strong>Invoice Number:</strong> INV-2025-221<br>
+            <strong>Invoice Date:</strong> <script>document.write(new Date().toLocaleDateString());</script>
+        </td>
+        <td class="no-border right">
+            <strong>Bill To:</strong><br>
+            [Customer Name]<br>
+            [Customer Address]<br>
+            [Customer Contact]
+        </td>
+    </tr>
+</table>
 
-          <label style="margin-top:8px">Seller SST No (if any)</label>
-          <input id="sellerSST"/>
-        </div>
-      </div>
-    </div>
+<table>
+    <thead>
+        <tr>
+            <th style="width:5%">#</th>
+            <th>Description</th>
+            <th style="width:15%">Qty</th>
+            <th style="width:15%">Unit Price (RM)</th>
+            <th style="width:15%">Total (RM)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>[Service / Work Description]</td>
+            <td>1</td>
+            <td>0.00</td>
+            <td>0.00</td>
+        </tr>
+    </tbody>
+</table>
 
-    <div class="card">
-      <label>Buyer / Bill to</label>
-      <div class="row">
-        <input id="buyerName" class="col" placeholder="Buyer name"/>
-        <input id="buyerReg" class="col" placeholder="Buyer SSM / Reg No (optional)"/>
-      </div>
-      <textarea id="buyerAddress" rows="2" style="margin-top:8px" placeholder="Buyer address"></textarea>
+<table style="margin-top:20px;">
+    <tr>
+        <td class="no-border" style="width:70%"></td>
+        <td class="no-border">
+            <strong>Subtotal:</strong> RM 0.00<br>
+            <strong>Total:</strong> RM 0.00
+        </td>
+    </tr>
+</table>
 
-      <label style="margin-top:8px">Tax & Notes</label>
-      <div style="display:flex;gap:8px">
-        <input id="taxRate" type="number" min="0" step="0.1" value="0" style="width:120px"/>
-        <input id="notes" placeholder="Notes shown on invoice" style="flex:1" value="Payment due within 14 days."/>
-      </div>
-    </div>
-
-    <div class="card">
-      <label>Invoice items</label>
-      <table class="items-table" id="itemsTable">
-        <thead>
-          <tr><th style="width:48%">Description</th><th style="width:10%">UOM</th><th style="width:10%">Qty</th><th style="width:14%">Unit (RM)</th><th style="width:14%">Total (RM)</th><th style="width:8%"></th></tr>
-        </thead>
-        <tbody id="itemsBody"></tbody>
-      </table>
-      <div style="margin-top:8px">
-        <button class="btn btn-ghost" id="addItem">+ Add item</button>
-      </div>
-    </div>
-
-    <div class="card no-print">
-      <label>Logo (optional)</label>
-      <input type="file" id="logoInput" accept="image/*"/>
-      <div id="logoWrap" style="margin-top:8px"></div>
-    </div>
-
-    <div id="previewArea" class="invoice-preview" style="display:none"></div>
-  </div>
+<p><strong>Notes:</strong> Thank you for your business.</p>
 
 <script>
-  // Utility
-  const $ = id => document.getElementById(id);
-  const fmt = n => 'RM ' + Number(n || 0).toLocaleString('en-MY', {minimumFractionDigits:2, maximumFractionDigits:2});
+function toggleMode() {
+    document.body.classList.toggle("dark");
+}
 
-  // Items functions
-  const itemsBody = $('itemsBody');
-  function createRow(desc='', uom='EA', qty=1, unit=0){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input class="desc" value="${desc.replaceAll('"','&quot;')}" placeholder="Description"/></td>
-      <td><input class="uom" value="${uom}"/></td>
-      <td><input type="number" class="qty" value="${qty}" min="0"/></td>
-      <td><input type="number" class="unit" value="${unit.toFixed(2)}" step="0.01"/></td>
-      <td class="right total">`+fmt(qty*unit)+`</td>
-      <td><button class="btn btn-ghost rm">Remove</button></td>`;
-    itemsBody.appendChild(tr);
-    tr.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', updateAll));
-    tr.querySelector('.rm').addEventListener('click', ()=>{ tr.remove(); updateAll(); });
-    updateAll();
-    return tr;
-  }
-
-  function readRows(){
-    return [...itemsBody.querySelectorAll('tr')].map(tr=>{
-      return {
-        description: tr.querySelector('.desc').value || '',
-        uom: tr.querySelector('.uom').value || '',
-        qty: Number(tr.querySelector('.qty').value) || 0,
-        unit: Number(tr.querySelector('.unit').value) || 0
-      };
-    });
-  }
-
-  function updateAll(){
-    const rows = readRows();
-    let subtotal = 0;
-    [...itemsBody.querySelectorAll('tr')].forEach((tr,i)=>{
-      const qty = Number(tr.querySelector('.qty').value) || 0;
-      const unit = Number(tr.querySelector('.unit').value) || 0;
-      const total = qty * unit;
-      subtotal += total;
-      tr.querySelector('.total').textContent = fmt(total);
-    });
-    const taxRate = Number($('taxRate').value) || 0;
-    const tax = subtotal * taxRate / 100;
-    const grand = subtotal + tax;
-
-    // Build preview
-    const pv = $('previewArea');
-    pv.innerHTML = '';
-    const header = document.createElement('div');
-    header.className='invoice-header';
-    const left = document.createElement('div');
-    const logoImg = $('logoWrap').querySelector('img');
-    if(logoImg){ left.appendChild(logoImg.cloneNode(true)); }
-    left.innerHTML += `<div style="font-weight:800;font-size:18px;margin-top:6px">${$('sellerName').value}</div>
-      <div class="small">${$('sellerAddress').value.replaceAll('\n','<br/>')}</div>
-      <div class="small">Reg No: ${$('sellerReg').value} • TIN: ${$('sellerTIN').value || '-'}</div>`;
-    const right = document.createElement('div');
-    right.style.textAlign='right';
-    right.innerHTML = `<div style="font-weight:700;font-size:16px">INVOICE</div>
-      <div class="small">No: ${$('invoiceNumber').value}</div>
-      <div class="small">Date: ${$('invoiceDate').value || new Date().toISOString().slice(0,10)}</div>
-      <div class="small">Due: ${$('dueDate').value || ''}</div>
-      <div class="small">UUID: ${$('uuid').value || '-'}</div>
-      <div class="small">Validated: ${$('lhdnTs').value || '-'}</div>`;
-    header.appendChild(left); header.appendChild(right);
-    pv.appendChild(header);
-
-    // buyer
-    const buyer = document.createElement('div');
-    buyer.style.marginTop='10px';
-    buyer.innerHTML = `<div class="small">Bill to</div><div style="font-weight:700">${$('buyerName').value}</div>
-      <div class="small">${$('buyerAddress').value.replaceAll('\n','<br/>')}</div>`;
-    pv.appendChild(buyer);
-
-    // items table
-    const tbl = document.createElement('table');
-    tbl.className='items-table';
-    tbl.innerHTML = `<thead><tr><th>Description</th><th>UOM</th><th>Qty</th><th>Unit (RM)</th><th class="right">Total (RM)</th></tr></thead>`;
-    const tb = document.createElement('tbody');
-    rows.forEach(r=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${escapeHtml(r.description)}</td><td>${escapeHtml(r.uom)}</td><td>${r.qty}</td><td>${(r.unit).toFixed(2)}</td><td class="right">${fmt(r.qty*r.unit)}</td>`;
-      tb.appendChild(tr);
-    });
-    tbl.appendChild(tb);
-    pv.appendChild(tbl);
-
-    // totals
-    const totals = document.createElement('div');
-    totals.style.marginTop='10px'; totals.style.width='320px'; totals.style.marginLeft='auto';
-    totals.innerHTML = `<div style="display:flex;justify-content:space-between"><div class="small">Subtotal</div><div class="small right">${fmt(subtotal)}</div></div>
-      <div style="display:flex;justify-content:space-between"><div class="small">Tax (${taxRate}%)</div><div class="small right">${fmt(tax)}</div></div>
-      <div style="font-weight:800;font-size:18px;display:flex;justify-content:space-between"><div>Total</div><div>${fmt(grand)}</div></div>`;
-    pv.appendChild(totals);
-
-    const notes = document.createElement('div'); notes.style.marginTop='12px'; notes.className='small';
-    notes.innerHTML = `<strong>Notes:</strong> ${escapeHtml($('notes').value)}<br/><strong>Bank:</strong> ${escapeHtml($('bankName').value)} • ${escapeHtml($('bankAcc').value)}`;
-    pv.appendChild(notes);
-    pv.style.display='block';
-  }
-
-  function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-  // Buttons
-  $('addItem').addEventListener('click', ()=> createRow('','EA',1,0));
-  $('btnPreview').addEventListener('click', ()=>{
-    if(itemsBody.children.length===0) createRow('Service description','EA',1,0);
-    updateAll();
-    setTimeout(()=> window.print(), 400);
-  });
-
-  // Export e-Invoice JSON
-  $('btnExportJSON').addEventListener('click', ()=>{
-    updateAll();
-    const info = {
-      documentType: $('documentType').value,
-      invoiceNumber: $('invoiceNumber').value,
-      invoiceDate: $('invoiceDate').value || new Date().toISOString().slice(0,10),
-      dueDate: $('dueDate').value || '',
-      currency: $('currency').value || 'MYR',
-      seller: {
-        name: $('sellerName').value,
-        ssm: $('sellerReg').value,
-        tin: $('sellerTIN').value,
-        sst_no: $('sellerSST').value,
-        address: $('sellerAddress').value,
-        phone: $('sellerPhone').value,
-        email: $('sellerEmail').value
-      },
-      buyer: {
-        name: $('buyerName').value,
-        ssm: $('buyerReg').value,
-        tin: '', // buyer TIN may be filled manually in Excel/script
-        address: $('buyerAddress').value,
-        email: ''
-      },
-      lines: readRows().map((r,i)=>({
-        lineNo: i+1,
-        description: r.description,
-        msic: '',
-        hsCode: '',
-        uom: r.uom,
-        quantity: r.qty,
-        unitPrice: r.unit,
-        lineDiscount: 0,
-        lineTotal: Number((r.qty * r.unit).toFixed(2)),
-        lineTaxPercent: 0,
-        lineTaxAmount: 0,
-        currency: $('currency').value || 'MYR'
-      }))
-    };
-    // totals
-    const subtotal = info.lines.reduce((s,l)=>s + l.lineTotal, 0);
-    const taxRate = Number($('taxRate').value) || 0;
-    const tax = +(subtotal * taxRate / 100).toFixed(2);
-    const total = +(subtotal + tax).toFixed(2);
-    info.summary = { subtotal, tax, total, taxRatePercent: taxRate };
-    info.payment = { method: 'BANK_TRANSFER', bank: $('bankName').value, account: $('bankAcc').value };
-    info.notes = $('notes').value;
-    info.uuid = $('uuid').value;
-    info.lhdnValidationTimestamp = $('lhdnTs').value;
-
-    const blob = new Blob([JSON.stringify(info, null, 2)], {type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = (info.invoiceNumber || 'invoice') + '.json'; a.click(); URL.revokeObjectURL(a.href);
-  });
-
-  // Logo upload & preview
-  $('logoInput').addEventListener('change', function(e){
-    const f = e.target.files[0]; if(!f) return;
-    const reader = new FileReader();
-    reader.onload = (ev)=>{
-      const img = document.createElement('img');
-      img.src = ev.target.result; img.className='logo-preview';
-      img.style.maxHeight='64px';
-      $('logoWrap').innerHTML = ''; $('logoWrap').appendChild(img);
-      updateAll();
-    }
-    reader.readAsDataURL(f);
-  });
-
-  // init sample rows
-  createRow('Design fee (flat rate)','EA',1,1200.00);
-  createRow('Materials (tiles, paints)','EA',1,650.00);
-  createRow('Labour (installation)','HOUR',8,80.00);
-  // default dates
-  const today = new Date().toISOString().slice(0,10);
-  $('invoiceDate').value = today;
-  const due = new Date(); due.setDate(due.getDate()+14);
-  $('dueDate').value = due.toISOString().slice(0,10);
-  updateAll();
+function changeTheme() {
+    const theme = document.getElementById("themeChanger").value;
+    document.body.className = theme;
+}
 </script>
+
 </body>
 </html>
