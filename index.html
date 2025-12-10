@@ -1,400 +1,158 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Invoice — Refit Maintenance Services</title>
-
-<!-- CDN libs for PDF generation -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNa5v3k0G6z4cA1k2s5gqkq8wF6QO4k0Jm0FhQf+qL+qz0v8m2aFzG1c9nH3m1b7sD7z2a2x1gZ0Gf2Pq9KqVw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-3oK3W0g+bI6Zq2n2r5A9Q9vV7x2Yq1Q9rj2f0X3w6d1s6l0q9y4bA7p6kJ3h8t5y1z1p6z7p4x8f2l6g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8" />
+<title>Refit Maintenance Services - Document Generator</title>
 
 <style>
-  :root{--accent:#0b5f8a;--muted:#666}
-  body{font-family:Inter,Segoe UI,Roboto,Arial;line-height:1.4;margin:0;background:#f4f6f8;color:#111}
-  .app{max-width:1100px;margin:20px auto;padding:18px}
-  .card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(10,20,30,0.06);margin-bottom:12px}
-  h1{margin:0 0 6px;color:var(--accent)}
-  label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
-  input,textarea,select{width:100%;padding:8px;border:1px solid #e6e9eb;border-radius:6px;font-size:14px;box-sizing:border-box}
-  .row{display:flex;gap:12px}
-  .col{flex:1}
-  .items-table{width:100%;border-collapse:collapse;margin-top:8px}
-  .items-table th,.items-table td{padding:8px;border-bottom:1px solid #efefef;text-align:left}
-  .items-table th{background:#fafafa}
-  .btn{display:inline-block;padding:8px 12px;border-radius:6px;border:0;cursor:pointer;font-weight:700}
-  .btn-accent{background:var(--accent);color:#fff}
-  .btn-ghost{background:#fff;border:1px solid #ddd}
-  .right{text-align:right}
-  .small{font-size:13px;color:var(--muted)}
-  .preview-box{background:#fff;padding:16px;border-radius:8px;margin-top:12px}
-  .logo-preview{max-height:64px}
-  .no-select{user-select:none}
-  @media print{ .no-print{display:none} .app{margin:0;padding:0} }
+ body { font-family: Arial, sans-serif; padding: 20px; }
+ h1 { margin-bottom: 10px; }
+
+ button {
+   padding: 10px 15px;
+   margin: 5px;
+   background: #007bff;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+ }
+ button:hover { background: #0056b3; }
+
+ .section { margin-top: 30px; }
+
+ textarea {
+   width: 100%;
+   height: 250px;
+   margin-top: 10px;
+   font-size: 14px;
+   padding: 10px;
+ }
 </style>
 </head>
+
 <body>
-  <div class="app">
-    <div class="row" style="align-items:center;justify-content:space-between">
-      <div>
-        <h1>Invoice — Refit Maintenance Services</h1>
-        <div class="small">SSM Reg No: 201803348973 • Sole proprietorship</div>
-        <div class="small">Contact: 012-2145922</div>
-      </div>
-      <div class="no-print">
-        <button id="btnNext" class="btn btn-ghost" title="Create next invoice">Next Invoice</button>
-        <button id="btnExportJson" class="btn btn-ghost">Export JSON</button>
-        <button id="btnPdf" class="btn btn-accent">Generate PDF</button>
-      </div>
-    </div>
 
-    <!-- EDIT FORM -->
-    <div class="card">
-      <div class="row">
-        <div class="col">
-          <label>Seller (pre-filled)</label>
-          <input id="sellerName" value="Refit Maintenance Services"/>
-          <div class="row" style="margin-top:8px">
-            <input id="sellerReg" placeholder="SSM Reg No" value="201803348973"/>
-            <input id="sellerTIN" placeholder="Seller TIN (if any)"/>
-          </div>
-          <textarea id="sellerAddress" rows="4" style="margin-top:8px">C-08-34, Centum @ Oasis Corporate Park
-Oasis Damansara
-No. 2, Jalan PJU 1A/2, Ara Damansara
-47301 Petaling Jaya
-Selangor Darul Ehsan
-West Malaysia</textarea>
-          <div class="row" style="margin-top:8px">
-            <input id="sellerPhone" value="012-2145922"/>
-            <input id="sellerEmail" placeholder="Email (optional)"/>
-          </div>
-          <div style="margin-top:8px" class="small">Bank: <strong>RHB Bank • 21261100023558</strong></div>
-        </div>
+<h1>Refit Maintenance Services - Document Generator</h1>
+<p>All buttons activated. Choose a document type below:</p>
 
-        <div style="width:360px">
-          <label>Invoice details</label>
-          <input id="invoiceNumber" value="INV-2025-221"/>
-          <div class="row" style="margin-top:8px">
-            <input id="invoiceDate" type="date"/>
-            <input id="dueDate" type="date"/>
-          </div>
-          <label style="margin-top:8px">Document type & currency</label>
-          <select id="documentType"><option>INVOICE</option><option>CREDIT_NOTE</option></select>
-          <input id="currency" value="MYR" style="margin-top:8px"/>
-          <label style="margin-top:8px">UUID (placeholder)</label>
-          <input id="uuid" placeholder="(will be filled after MyInvois validation)"/>
-        </div>
-      </div>
-    </div>
+<!-- BUTTONS -->
+<button onclick="generateInvoice()">Generate Invoice</button>
+<button onclick="generateDO()">Generate Delivery Order (D.O.)</button>
+<button onclick="generatePO()">Generate Purchase Order (P.O.)</button>
+<button onclick="generateQuotation()">Generate Quotation</button>
+<button onclick="generateReceipt()">Generate Receipt</button>
+<button onclick="generateWord()">Generate Word Format</button>
+<button onclick="generatePDF()">Generate PDF</button>
 
-    <div class="card">
-      <label>Bill to (buyer)</label>
-      <div class="row">
-        <input id="buyerName" class="col" placeholder="Buyer name"/>
-        <input id="buyerReg" class="col" placeholder="Buyer SSM / Reg No"/>
-      </div>
-      <textarea id="buyerAddress" rows="2" style="margin-top:8px" placeholder="Buyer address"></textarea>
-      <div class="row" style="margin-top:8px">
-        <input id="taxRate" type="number" value="0" min="0" step="0.1" style="width:120px"/>
-        <input id="notes" placeholder="Notes" value="Payment due within 14 days."/>
-      </div>
-    </div>
-
-    <div class="card">
-      <label>Invoice items</label>
-      <table class="items-table" id="itemsTable">
-        <thead><tr><th>Description</th><th>UOM</th><th>Qty</th><th>Unit (RM)</th><th class="right">Total (RM)</th><th></th></tr></thead>
-        <tbody id="itemsBody"></tbody>
-      </table>
-      <div style="margin-top:8px">
-        <button id="addItem" class="btn btn-ghost">+ Add item</button>
-      </div>
-    </div>
-
-    <div class="card no-print">
-      <label>Logo (optional)</label>
-      <input type="file" id="logoInput" accept="image/*"/>
-      <div id="logoWrap" style="margin-top:8px"></div>
-      <div style="margin-top:12px">
-        <button id="btnPreviewToggle" class="btn btn-ghost">Turn on preview</button>
-        <span class="small" style="margin-left:8px">Press the button to turn on the preview.</span>
-      </div>
-    </div>
-
-    <!-- PREVIEW -->
-    <div id="previewContainer" class="preview-box" style="display:none"></div>
-  </div>
+<!-- OUTPUT AREA -->
+<div class="section">
+ <h2>Generated Output:</h2>
+ <textarea id="output"></textarea>
+</div>
 
 <script>
-  // ---------- Utilities ----------
-  const $ = id => document.getElementById(id);
-  const fmt = n => 'RM ' + Number(n||0).toLocaleString('en-MY', {minimumFractionDigits:2, maximumFractionDigits:2});
-  const itemsBody = $('itemsBody');
+// INVOICE
+function generateInvoice() {
+ document.getElementById('output').value =
+`INVOICE
+Refit Maintenance Services
+Invoice No: INV-2025-001
+Date: ____________
 
-  // ---------- Auto-invoice number (localStorage) ----------
-  const STORAGE_KEY = 'refit_last_invoice';
-  function readLastInvoice(){
-    const v = localStorage.getItem(STORAGE_KEY);
-    if (!v) {
-      localStorage.setItem(STORAGE_KEY, 'INV-2025-221');
-      return 'INV-2025-221';
-    }
-    return v;
-  }
-  function setLastInvoice(inv){
-    localStorage.setItem(STORAGE_KEY, inv);
-  }
-  function incrementInvoice(inv){
-    // expects format like INV-2025-221, increments numeric suffix
-    const m = inv.match(/(.*?)(\d+)$/);
-    if (!m) return inv + '-1';
-    const prefix = m[1];
-    const num = parseInt(m[2],10) + 1;
-    // keep same digits length if possible
-    const digits = m[2].length;
-    const newNum = String(num).padStart(digits, '0');
-    return prefix + newNum;
-  }
-  // set current invoice input from storage on load
-  window.addEventListener('load', ()=> {
-    const last = readLastInvoice();
-    $('invoiceNumber').value = last;
-    // default dates
-    const today = new Date().toISOString().slice(0,10);
-    $('invoiceDate').value = today;
-    const due = new Date(); due.setDate(due.getDate()+14);
-    $('dueDate').value = due.toISOString().slice(0,10);
-  });
+Bill To: ___________________________
 
-  // ---------- Items management ----------
-  function createRow(desc='', uom='EA', qty=1, unit=0.00){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input class="desc" value="${escapeHtml(desc)}" placeholder="Description"/></td>
-      <td style="width:80px"><input class="uom" value="${escapeHtml(uom)}"/></td>
-      <td style="width:80px"><input class="qty" type="number" value="${qty}" min="0"/></td>
-      <td style="width:120px"><input class="unit" type="number" step="0.01" value="${unit.toFixed(2)}"/></td>
-      <td class="right total">`+fmt(qty*unit)+`</td>
-      <td style="width:90px"><button class="btn btn-ghost rm">Remove</button></td>`;
-    itemsBody.appendChild(tr);
-    tr.querySelectorAll('input').forEach(i=>i.addEventListener('input', updateAll));
-    tr.querySelector('.rm').addEventListener('click', ()=>{ tr.remove(); updateAll(); });
-    updateAll();
-    return tr;
-  }
-  function readRows(){
-    return [...itemsBody.querySelectorAll('tr')].map((tr,i)=>{
-      return {
-        description: tr.querySelector('.desc').value || '',
-        uom: tr.querySelector('.uom').value || '',
-        qty: Number(tr.querySelector('.qty').value) || 0,
-        unit: Number(tr.querySelector('.unit').value) || 0
-      };
-    });
-  }
+Description | Qty | Unit Price | Total
+--------------------------------------------------
+Service Description | 1 | RM 100 | RM 100
 
-  $('addItem').addEventListener('click', ()=> createRow('','EA',1,0));
+Grand Total: RM 100
+`;
+}
 
-  // Sample starter rows
-  createRow('Design fee (flat rate)','EA',1,1200.00);
-  createRow('Materials (tiles, paints)','EA',1,650.00);
-  createRow('Labour (installation)','HOUR',8,80.00);
+// DELIVERY ORDER
+function generateDO() {
+ document.getElementById('output').value =
+`DELIVERY ORDER (D.O.)
+Refit Maintenance Services
+DO No: DO-2025-001
+Date: ____________
 
-  // ---------- Preview rendering ----------
-  const previewContainer = $('previewContainer');
-  function updateAll(){
-    const rows = readRows();
-    let subtotal = 0;
-    rows.forEach(r=> subtotal += r.qty * r.unit);
-    const taxRate = Number($('taxRate').value) || 0;
-    const tax = +(subtotal * taxRate / 100).toFixed(2);
-    const total = +(subtotal + tax).toFixed(2);
+Deliver To: ___________________________
 
-    // Build HTML preview
-    const logoImg = $('logoWrap').querySelector('img');
-    let html = `<div style="display:flex;justify-content:space-between;align-items:flex-start">`;
-    html += `<div style="max-width:60%">`;
-    if (logoImg) html += `<div><img src="${logoImg.src}" style="max-height:64px"></div>`;
-    html += `<div style="font-weight:800;font-size:18px;margin-top:6px">${escapeHtml($('sellerName').value)}</div>`;
-    html += `<div style="font-size:13px;color:#555;margin-top:6px;white-space:pre-line">${escapeHtml($('sellerAddress').value)}</div>`;
-    html += `<div style="font-size:13px;color:#555;margin-top:6px">Reg No: ${escapeHtml($('sellerReg').value)} • TIN: ${escapeHtml($('sellerTIN').value||'-')}</div>`;
-    html += `</div>`;
-    html += `<div style="text-align:right">`;
-    html += `<div style="font-weight:700;font-size:18px">INVOICE</div>`;
-    html += `<div style="margin-top:6px">No: ${escapeHtml($('invoiceNumber').value)}</div>`;
-    html += `<div>Date: ${escapeHtml($('invoiceDate').value)}</div>`;
-    html += `<div>Due: ${escapeHtml($('dueDate').value)}</div>`;
-    html += `<div>UUID: ${escapeHtml($('uuid').value||'-')}</div>`;
-    html += `</div></div>`;
+Item | Qty
+---------------------------
+Item Description | 1
 
-    html += `<hr style="margin:12px 0">`;
-    html += `<div style="display:flex;justify-content:space-between">`;
-    html += `<div><strong>Bill to</strong><div style="font-weight:700">${escapeHtml($('buyerName').value)}</div><div style="white-space:pre-line">${escapeHtml($('buyerAddress').value)}</div></div>`;
-    html += `<div style="text-align:right"><div style="font-size:13px">Bank: ${escapeHtml($('bankName') ? $('bankName').value : 'RHB Bank')}</div></div>`;
-    html += `</div>`;
+Received By: _____________
+`;
+}
 
-    // items table
-    html += `<table style="width:100%;border-collapse:collapse;margin-top:10px;border:1px solid #ddd">`;
-    html += `<thead><tr style="background:#fafafa"><th style="padding:6px">Description</th><th style="padding:6px">UOM</th><th style="padding:6px">Qty</th><th style="padding:6px">Unit (RM)</th><th style="padding:6px;text-align:right">Total (RM)</th></tr></thead><tbody>`;
-    rows.forEach(r=>{
-      html += `<tr><td style="padding:6px">${escapeHtml(r.description)}</td><td style="padding:6px">${escapeHtml(r.uom)}</td><td style="padding:6px">${r.qty}</td><td style="padding:6px">${r.unit.toFixed(2)}</td><td style="padding:6px;text-align:right">${fmt(r.qty*r.unit)}</td></tr>`;
-    });
-    html += `</tbody></table>`;
+// PURCHASE ORDER
+function generatePO() {
+ document.getElementById('output').value =
+`PURCHASE ORDER (P.O.)
+Refit Maintenance Services
+PO No: PO-2025-001
+Date: ____________
 
-    html += `<div style="width:300px;margin-left:auto;margin-top:12px">`;
-    html += `<div style="display:flex;justify-content:space-between"><div>Subtotal</div><div>${fmt(subtotal)}</div></div>`;
-    html += `<div style="display:flex;justify-content:space-between"><div>Tax (${taxRate}%)</div><div>${fmt(tax)}</div></div>`;
-    html += `<div style="font-weight:800;font-size:18px;display:flex;justify-content:space-between"><div>Total</div><div>${fmt(total)}</div></div></div>`;
+Supplier: ___________________________
 
-    html += `<div style="margin-top:12px;font-size:13px;color:#444">Notes: ${escapeHtml($('notes').value)}</div>`;
+Item | Qty | Price
+-------------------------------------------
+Item Description | 1 | RM ___
 
-    previewContainer.innerHTML = html;
-  }
+Approved By: _____________
+`;
+}
 
-  // Preview toggle
-  let previewOn = false;
-  $('btnPreviewToggle').addEventListener('click', ()=>{
-    previewOn = !previewOn;
-    if (previewOn){
-      $('btnPreviewToggle').textContent = 'Turn off preview';
-      previewContainer.style.display = 'block';
-      updateAll();
-      window.scrollTo({top: previewContainer.offsetTop-10, behavior:'smooth'});
-    } else {
-      $('btnPreviewToggle').textContent = 'Turn on preview';
-      previewContainer.style.display = 'none';
-    }
-  });
+// QUOTATION
+function generateQuotation() {
+ document.getElementById('output').value =
+`QUOTATION
+Refit Maintenance Services
+Quotation No: QT-2025-001
+Date: ____________
 
-  // Logo input
-  $('logoInput').addEventListener('change', function(e){
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = document.createElement('img'); img.src = ev.target.result; img.className='logo-preview';
-      $('logoWrap').innerHTML = ''; $('logoWrap').appendChild(img);
-      updateAll();
-    }
-    reader.readAsDataURL(file);
-  });
+Client: ___________________________
 
-  // update preview on inputs
-  ['sellerName','sellerAddress','sellerReg','sellerTIN','invoiceNumber','invoiceDate','dueDate','buyerName','buyerAddress','taxRate','notes'].forEach(id=>{
-    $(id).addEventListener('input', ()=>{ if(previewOn) updateAll(); });
-  });
+Description | Qty | Unit Price | Total
+--------------------------------------------------
+Service Description | 1 | RM ___ | RM ___
 
-  // ---------- JSON export ----------
-  $('btnExportJson').addEventListener('click', ()=>{
-    const payload = buildPayload();
-    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (payload.invoiceNumber || 'invoice') + '.json'; a.click(); URL.revokeObjectURL(a.href);
-  });
+Validity: 14 days
+Prepared By: _____________
+`;
+}
 
-  function buildPayload(){
-    const rows = readRows();
-    const subtotal = rows.reduce((s,r)=> s + (r.qty*r.unit), 0);
-    const taxRate = Number($('taxRate').value) || 0;
-    const tax = +(subtotal * taxRate / 100).toFixed(2);
-    const total = +(subtotal + tax).toFixed(2);
-    return {
-      documentType: $('documentType').value,
-      invoiceNumber: $('invoiceNumber').value,
-      invoiceDate: $('invoiceDate').value,
-      dueDate: $('dueDate').value,
-      currency: $('currency').value,
-      seller: {
-        name: $('sellerName').value,
-        ssm: $('sellerReg').value,
-        tin: $('sellerTIN').value,
-        address: $('sellerAddress').value,
-        phone: $('sellerPhone').value,
-        email: $('sellerEmail').value
-      },
-      buyer: {
-        name: $('buyerName').value,
-        ssm: $('buyerReg').value,
-        address: $('buyerAddress').value
-      },
-      lines: rows.map((r,i)=>({
-        lineNo: i+1,
-        description: r.description,
-        uom: r.uom,
-        quantity: r.qty,
-        unitPrice: +r.unit,
-        lineTotal: +(r.qty*r.unit).toFixed(2),
-        lineTaxPercent: 0,
-        currency: $('currency').value
-      })),
-      summary: { subtotal: +(subtotal.toFixed(2)), tax, total, taxRatePercent: taxRate },
-      payment: { bank: 'RHB Bank', account: '21261100023558' },
-      notes: $('notes').value,
-      uuid: $('uuid').value,
-      lhdnValidationTimestamp: '' // to be filled after submission to MyInvois
-    };
-  }
+// RECEIPT
+function generateReceipt() {
+ document.getElementById('output').value =
+`RECEIPT
+Refit Maintenance Services
+Receipt No: RC-2025-001
+Date: ____________
 
-  // ---------- PDF generation ----------
-  async function generatePDF(){
-    // ensure preview is on to capture full invoice layout
-    if(!previewOn){ $('btnPreviewToggle').click(); await new Promise(r=>setTimeout(r,300)); }
-    const node = previewContainer;
-    // use html2canvas to capture
-    const canvas = await html2canvas(node, {scale: 2, useCORS: true, logging:false});
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p','mm','a4');
-    // compute image size
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const imgW = canvas.width;
-    const imgH = canvas.height;
-    const ratio = Math.min(pageW / (imgW/ (96/25.4)), pageH / (imgH/ (96/25.4)));
-    // alternative approach: convert px to mm roughly (px * 25.4 / 96)
-    const pxToMm = px => px * 25.4 / 96;
-    const imgWidthMm = pxToMm(canvas.width);
-    const imgHeightMm = pxToMm(canvas.height);
-    const scale = Math.min(pageW / imgWidthMm, pageH / imgHeightMm);
-    const finalW = imgWidthMm * scale;
-    const finalH = imgHeightMm * scale;
-    pdf.addImage(imgData, 'PNG', 7, 7, finalW-14, finalH-14);
-    const fileName = ($('invoiceNumber').value || 'invoice') + '.pdf';
-    pdf.save(fileName);
-    // after save, optionally toggle preview off (do not change invoice)
-  }
+Received From: ___________________________
+Amount: RM ________
+Payment For: ___________________________
 
-  $('btnPdf').addEventListener('click', async ()=> {
-    try{
-      $('btnPdf').disabled = true; $('btnPdf').textContent = 'Generating PDF...';
-      await generatePDF();
-    } catch (e){
-      alert('PDF generation failed: ' + e.message);
-      console.error(e);
-    } finally {
-      $('btnPdf').disabled = false; $('btnPdf').textContent = 'Generate PDF';
-    }
-  });
+Payment Method: Cash / Transfer / QRPay
 
-  // ---------- Next invoice (auto increment) ----------
-  $('btnNext').addEventListener('click', ()=> {
-    // Save current invoiceNumber as last
-    const current = $('invoiceNumber').value || readLastInvoice();
-    const next = incrementInvoice(current);
-    setLastInvoice(next);
-    // reset fields for new invoice (keep seller data)
-    $('invoiceNumber').value = next;
-    // clear buyer and items
-    $('buyerName').value = ''; $('buyerAddress').value = '';
-    itemsBody.innerHTML = '';
-    createRow('','EA',1,0);
-    updateAll();
-    // focus
-    $('buyerName').focus();
-  });
+Issued By: _____________
+`;
+}
 
-  // ---------- Helpers ----------
-  function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-  // update when page loads
-  updateAll();
+// WORD DOCUMENT (placeholder)
+function generateWord() {
+ alert("Word (.docx) export will require backend or JS library. I can add this.");
+}
+
+// PDF DOCUMENT (placeholder)
+function generatePDF() {
+ alert("PDF export requires backend or JS PDF library. I can add this too.");
+}
 </script>
+
 </body>
 </html>
