@@ -1,168 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Refit Maintenance Services - Document Generator</title>
-
+<meta charset="UTF-8">
+<title>Business Document Creator</title>
 <style>
- body { font-family: Arial, sans-serif; padding: 20px; }
- h1 { margin-bottom: 10px; }
- .logo-box { margin-bottom: 20px; }
-
- button {
-   padding: 10px 15px;
-   margin: 5px;
-   background: #007bff;
-   color: white;
-   border: none;
-   border-radius: 5px;
-   cursor: pointer;
- }
- button:hover { background: #0056b3; }
-
- .section { margin-top: 30px; }
-
- textarea {
-   width: 100%;
-   height: 250px;
-   margin-top: 10px;
-   font-size: 14px;
-   padding: 10px;
- }
-
- #logoPreview {
-   height: 80px;
-   margin-top: 10px;
-   display: none;
- }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    .container { background: #fff; padding: 20px; border-radius: 10px; width: 900px; margin: auto; }
+    h2 { margin-top: 40px; }
+    button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    input, textarea, select { width: 100%; padding: 8px; margin: 5px 0 15px; }
+    #logoPreview { max-height: 100px; margin-top: 10px; display: block; }
+    .doc-box { border: 1px solid #ccc; padding: 15px; border-radius: 7px; background: #fafafa; }
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<h1>Refit Maintenance Services - Document Generator</h1>
+<h1>Business Document Generator</h1>
 
-<!-- LOGO UPLOAD -->
-<div class="logo-box">
- <label><strong>Upload Company Logo:</strong></label><br>
- <input type="file" accept="image/*" onchange="previewLogo(event)">
- <br>
- <img id="logoPreview" alt="Company Logo Preview">
-</div>
+<!-- Logo Upload -->
+<h2>Company Logo</h2>
+<input type="file" id="logoUpload" accept="image/*">
+<img id="logoPreview">
 
-<!-- BUTTONS (NEW SEQUENCE) -->
-<button onclick="generateQuotation()">Create Quotation</button>
-<button onclick="generateInvoice()">Create Invoice</button>
-<button onclick="generateReceipt()">Create Receipt</button>
-<button onclick="generatePO()">Create Purchase Order (PO)</button>
-<button onclick="generateDO()">Create Delivery Order (DO)</button>
-<button onclick="printPDF()">Print / Send (Convert to PDF)</button>
+<!-- Personal Template Settings -->
+<h2>Personal Template Settings</h2>
+<input type="text" id="companyName" placeholder="Company Name">
+<input type="text" id="companyAddress" placeholder="Company Address">
+<input type="text" id="companyPhone" placeholder="Company Phone Number">
+<button onclick="saveTemplate()">Save Template</button>
+<button onclick="loadTemplate()">Load Template</button>
+
+<hr>
+
+<!-- MAIN DOCUMENT FORM -->
+<h2>Create Document</h2>
+
+<label>Select Document Type:</label>
+<select id="docType">
+    <option value="Quotation">Quotation</option>
+    <option value="Invoice">Invoice</option>
+    <option value="Receipt">Receipt</option>
+    <option value="PO">Purchase Order (PO)</option>
+    <option value="DO">Delivery Order (DO)</option>
+</select>
+
+<label>Date:</label>
+<input type="date" id="docDate">
+
+<label>Customer Name:</label>
+<input type="text" id="customerName">
+
+<label>Item Description:</label>
+<textarea id="itemDesc"></textarea>
+
+<label>Amount (RM):</label>
+<input type="number" id="amount">
+
+<button onclick="generateDocument()">Generate Document</button>
 
 <!-- OUTPUT AREA -->
-<div class="section">
- <h2>Generated Output:</h2>
- <textarea id="output"></textarea>
+<h2>Generated Document</h2>
+<div id="output" class="doc-box"></div>
+
+<button onclick="printDocument()">Print / Send</button>
+<button onclick="downloadPDF()">Save as PDF</button>
+
 </div>
 
 <script>
-// LOGO PREVIEW
-function previewLogo(event) {
- const img = document.getElementById('logoPreview');
- img.src = URL.createObjectURL(event.target.files[0]);
- img.style.display = 'block';
+// AUTO FILL TODAY DATE
+document.getElementById("docDate").value = new Date().toISOString().split("T")[0];
+
+// LOGO UPLOAD PREVIEW
+document.getElementById("logoUpload").addEventListener("change", function(){
+    const file = this.files[0];
+    document.getElementById("logoPreview").src = URL.createObjectURL(file);
+});
+
+// SAVE TEMPLATE
+function saveTemplate() {
+    const template = {
+        name: document.getElementById("companyName").value,
+        addr: document.getElementById("companyAddress").value,
+        phone: document.getElementById("companyPhone").value
+    };
+    localStorage.setItem("template", JSON.stringify(template));
+    alert("Template saved!");
 }
 
-// QUOTATION
-function generateQuotation() {
- document.getElementById('output').value =
-`QUOTATION
-Refit Maintenance Services
-Quotation No: QT-2025-001
-Date: ____________
-
-Client: ___________________________
-
-Description | Qty | Unit Price | Total
---------------------------------------------------
-Service Description | 1 | RM ___ | RM ___
-
-Validity: 14 days
-Prepared By: _____________`;
+// LOAD TEMPLATE
+function loadTemplate() {
+    const data = JSON.parse(localStorage.getItem("template"));
+    if (data) {
+        document.getElementById("companyName").value = data.name;
+        document.getElementById("companyAddress").value = data.addr;
+        document.getElementById("companyPhone").value = data.phone;
+    } else {
+        alert("No template found!");
+    }
 }
 
-// INVOICE
-function generateInvoice() {
- document.getElementById('output').value =
-`INVOICE
-Refit Maintenance Services
-Invoice No: INV-2025-001
-Date: ____________
+// GENERATE DOCUMENT
+function generateDocument() {
+    const logo = document.getElementById("logoPreview").src;
+    const type = document.getElementById("docType").value;
+    const date = document.getElementById("docDate").value;
+    const cust = document.getElementById("customerName").value;
+    const desc = document.getElementById("itemDesc").value;
+    const amt = document.getElementById("amount").value;
 
-Bill To: ___________________________
+    document.getElementById("output").innerHTML = `
+        <img src="${logo}" style="max-height:80px;"><br><br>
+        <b>${document.getElementById("companyName").value}</b><br>
+        ${document.getElementById("companyAddress").value}<br>
+        ${document.getElementById("companyPhone").value}<br><br>
 
-Description | Qty | Unit Price | Total
---------------------------------------------------
-Service Description | 1 | RM 100 | RM 100
+        <h2>${type}</h2>
+        <b>Date:</b> ${date}<br>
+        <b>Customer:</b> ${cust}<br><br>
 
-Grand Total: RM 100`;
+        <b>Description:</b><br>
+        ${desc}<br><br>
+
+        <b>Amount:</b> RM ${amt}<br><br>
+
+        <hr>
+        <i>This is a system-generated ${type}.</i>
+    `;
 }
 
-// RECEIPT
-function generateReceipt() {
- document.getElementById('output').value =
-`RECEIPT
-Refit Maintenance Services
-Receipt No: RC-2025-001
-Date: ____________
-
-Received From: ___________________________
-Amount: RM ________
-Payment For: ___________________________
-
-Payment Method: Cash / Transfer / QRPay
-
-Issued By: _____________`;
+// PRINT DOCUMENT
+function printDocument() {
+    const content = document.getElementById("output").innerHTML;
+    const printWindow = window.open("", "", "width=900,height=650");
+    printWindow.document.write(content);
+    printWindow.document.close();
+    printWindow.print();
 }
 
-// PURCHASE ORDER
-function generatePO() {
- document.getElementById('output').value =
-`PURCHASE ORDER (P.O.)
-Refit Maintenance Services
-PO No: PO-2025-001
-Date: ____________
-
-Supplier: ___________________________
-
-Item | Qty | Price
--------------------------------------------
-Item Description | 1 | RM ___
-
-Approved By: _____________`;
-}
-
-// DELIVERY ORDER
-function generateDO() {
- document.getElementById('output').value =
-`DELIVERY ORDER (D.O.)
-Refit Maintenance Services
-DO No: DO-2025-001
-Date: ____________
-
-Deliver To: ___________________________
-
-Item | Qty
----------------------------
-Item Description | 1
-
-Received By: _____________`;
-}
-
-// PRINT / SAVE AS PDF
-function printPDF() {
- window.print(); // Browser handles PDF creation
+// SAVE AS PDF
+function downloadPDF() {
+    const element = document.getElementById("output");
+    const opt = {
+        margin: 10,
+        filename: "document.pdf",
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+    };
+    html2pdf().from(element).set(opt).save();
 }
 </script>
+
+<!-- PDF LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 </body>
 </html>
