@@ -1,3 +1,7 @@
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
+
 html_content = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,7 +74,8 @@ html_content = """<!DOCTYPE html>
 </html>
 """
 
-file_path = "/mnt/data/refit_invoice.html"
+# Save as .txt for download
+file_path = "/mnt/data/refit_invoice.html.txt"
 with open(file_path, "w", encoding="utf-8") as f:
     f.write(html_content)
 
