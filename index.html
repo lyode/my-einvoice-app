@@ -7,6 +7,7 @@
 <style>
  body { font-family: Arial, sans-serif; padding: 20px; }
  h1 { margin-bottom: 10px; }
+ .logo-box { margin-bottom: 20px; }
 
  button {
    padding: 10px 15px;
@@ -28,22 +29,34 @@
    font-size: 14px;
    padding: 10px;
  }
+
+ #logoPreview {
+   height: 80px;
+   margin-top: 10px;
+   display: none;
+ }
 </style>
 </head>
 
 <body>
 
 <h1>Refit Maintenance Services - Document Generator</h1>
-<p>All buttons activated. Choose a document type below:</p>
 
-<!-- BUTTONS -->
-<button onclick="generateInvoice()">Generate Invoice</button>
-<button onclick="generateDO()">Generate Delivery Order (D.O.)</button>
-<button onclick="generatePO()">Generate Purchase Order (P.O.)</button>
-<button onclick="generateQuotation()">Generate Quotation</button>
-<button onclick="generateReceipt()">Generate Receipt</button>
-<button onclick="generateWord()">Generate Word Format</button>
-<button onclick="generatePDF()">Generate PDF</button>
+<!-- LOGO UPLOAD -->
+<div class="logo-box">
+ <label><strong>Upload Company Logo:</strong></label><br>
+ <input type="file" accept="image/*" onchange="previewLogo(event)">
+ <br>
+ <img id="logoPreview" alt="Company Logo Preview">
+</div>
+
+<!-- BUTTONS (NEW SEQUENCE) -->
+<button onclick="generateQuotation()">Create Quotation</button>
+<button onclick="generateInvoice()">Create Invoice</button>
+<button onclick="generateReceipt()">Create Receipt</button>
+<button onclick="generatePO()">Create Purchase Order (PO)</button>
+<button onclick="generateDO()">Create Delivery Order (DO)</button>
+<button onclick="printPDF()">Print / Send (Convert to PDF)</button>
 
 <!-- OUTPUT AREA -->
 <div class="section">
@@ -52,58 +65,11 @@
 </div>
 
 <script>
-// INVOICE
-function generateInvoice() {
- document.getElementById('output').value =
-`INVOICE
-Refit Maintenance Services
-Invoice No: INV-2025-001
-Date: ____________
-
-Bill To: ___________________________
-
-Description | Qty | Unit Price | Total
---------------------------------------------------
-Service Description | 1 | RM 100 | RM 100
-
-Grand Total: RM 100
-`;
-}
-
-// DELIVERY ORDER
-function generateDO() {
- document.getElementById('output').value =
-`DELIVERY ORDER (D.O.)
-Refit Maintenance Services
-DO No: DO-2025-001
-Date: ____________
-
-Deliver To: ___________________________
-
-Item | Qty
----------------------------
-Item Description | 1
-
-Received By: _____________
-`;
-}
-
-// PURCHASE ORDER
-function generatePO() {
- document.getElementById('output').value =
-`PURCHASE ORDER (P.O.)
-Refit Maintenance Services
-PO No: PO-2025-001
-Date: ____________
-
-Supplier: ___________________________
-
-Item | Qty | Price
--------------------------------------------
-Item Description | 1 | RM ___
-
-Approved By: _____________
-`;
+// LOGO PREVIEW
+function previewLogo(event) {
+ const img = document.getElementById('logoPreview');
+ img.src = URL.createObjectURL(event.target.files[0]);
+ img.style.display = 'block';
 }
 
 // QUOTATION
@@ -121,8 +87,24 @@ Description | Qty | Unit Price | Total
 Service Description | 1 | RM ___ | RM ___
 
 Validity: 14 days
-Prepared By: _____________
-`;
+Prepared By: _____________`;
+}
+
+// INVOICE
+function generateInvoice() {
+ document.getElementById('output').value =
+`INVOICE
+Refit Maintenance Services
+Invoice No: INV-2025-001
+Date: ____________
+
+Bill To: ___________________________
+
+Description | Qty | Unit Price | Total
+--------------------------------------------------
+Service Description | 1 | RM 100 | RM 100
+
+Grand Total: RM 100`;
 }
 
 // RECEIPT
@@ -139,18 +121,46 @@ Payment For: ___________________________
 
 Payment Method: Cash / Transfer / QRPay
 
-Issued By: _____________
-`;
+Issued By: _____________`;
 }
 
-// WORD DOCUMENT (placeholder)
-function generateWord() {
- alert("Word (.docx) export will require backend or JS library. I can add this.");
+// PURCHASE ORDER
+function generatePO() {
+ document.getElementById('output').value =
+`PURCHASE ORDER (P.O.)
+Refit Maintenance Services
+PO No: PO-2025-001
+Date: ____________
+
+Supplier: ___________________________
+
+Item | Qty | Price
+-------------------------------------------
+Item Description | 1 | RM ___
+
+Approved By: _____________`;
 }
 
-// PDF DOCUMENT (placeholder)
-function generatePDF() {
- alert("PDF export requires backend or JS PDF library. I can add this too.");
+// DELIVERY ORDER
+function generateDO() {
+ document.getElementById('output').value =
+`DELIVERY ORDER (D.O.)
+Refit Maintenance Services
+DO No: DO-2025-001
+Date: ____________
+
+Deliver To: ___________________________
+
+Item | Qty
+---------------------------
+Item Description | 1
+
+Received By: _____________`;
+}
+
+// PRINT / SAVE AS PDF
+function printPDF() {
+ window.print(); // Browser handles PDF creation
 }
 </script>
 
