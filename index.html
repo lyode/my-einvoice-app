@@ -3,545 +3,327 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Refit Maintenance Services — Invoice App</title>
-
-<!-- meta for PWA -->
-<meta name="theme-color" content="#0b5f8a">
-<link rel="icon" href="data:;base64,iVBORw0KGgo=">
-
-<!-- styles -->
+<title>Smart Invoice App — Refit Interior</title>
 <style>
-  :root{--bg:#ffffff;--text:#111;--card:#f7f8fb;--accent:#DFE7FD;--accent-strong:#0b5f8a}
-  body.dark{--bg:#0f1112;--text:#eef2f3;--card:#1a1c1f;--accent:#263238;--accent-strong:#66bb6a}
-  /* 12 pastel themes (accent background on header) */
-  body.theme1{--accent:#FDE2E4} body.theme2{--accent:#FFF1E6} body.theme3{--accent:#F0EFEB}
-  body.theme4{--accent:#DFE7FD} body.theme5{--accent:#E2ECE9} body.theme6{--accent:#F9E5C8}
-  body.theme7{--accent:#F6DFEB} body.theme8{--accent:#E8F3D6} body.theme9{--accent:#DDF1F0}
-  body.theme10{--accent:#FCE2CE} body.theme11{--accent:#E6E6FA} body.theme12{--accent:#E0FFD1}
-
-  *{box-sizing:border-box}
-  body{font-family:Inter, Arial, Helvetica, sans-serif;margin:18px;background:var(--bg);color:var(--text);transition:all .22s}
-  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .btn{padding:8px 12px;border-radius:8px;border:0;font-weight:700;cursor:pointer}
-  .btn-ghost{background:#fff;border:1px solid #d0d0d0}
-  .btn-primary{background:var(--accent-strong);color:#fff}
-  .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-  .header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#fff)}
-  .logo{max-height:72px;object-fit:contain}
-  input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;font-size:14px;background:white}
-  textarea{min-height:64px}
-  label.small{font-size:13px;color:#666}
-  .row{display:flex;gap:12px}
-  .col{flex:1}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{padding:8px;border-bottom:1px solid rgba(0,0,0,0.06);text-align:left}
-  .right{text-align:right}
-  .muted{color:gray;font-size:13px}
-  .theme-swatch{width:28px;height:20px;border-radius:6px;cursor:pointer;border:1px solid rgba(0,0,0,0.08)}
-  .right-panel{width:380px}
-  .small-note{font-size:13px;color:#444;margin-top:6px}
-
-  /* Hide control elements during print */
-  @media print{
-    .no-print{display:none !important}
-    body{background:#fff;color:#000}
+  :root{
+    --accent:#0b5f8a; --muted:#666; --bg:#f4f6f8; --text:#111;
+    --pastel1:#d0e7ff; --pastel2:#d0ffd6; --pastel3:#fff5b1; 
+    --pastel4:#ffd6b1; --pastel5:#ffc2d1; --pastel6:#e1d0ff;
+    --night-bg:#1c1c1c; --night-text:#eee;
   }
-
-  /* PWA install toast area */
-  .install-toast{position:fixed;right:18px;bottom:18px;background:var(--card);padding:10px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.12);display:none}
+  body{
+    font-family:Inter,Segoe UI,Roboto,Arial;
+    line-height:1.35;margin:0;background:var(--bg);color:var(--text);
+    transition: background 0.3s, color 0.3s;
+  }
+  body.night{background:var(--night-bg); color:var(--night-text);}
+  .app{max-width:1100px;margin:28px auto;padding:20px}
+  h1{margin:0 0 12px;font-size:22px;color:var(--accent)}
+  .grid{display:grid;gap:12px}
+  .row{display:flex;gap:12px}
+  .card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(15,20,30,0.06); transition: background 0.3s, color 0.3s;}
+  body.night .card{background:#2a2a2a;}
+  input,textarea,select{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff; color:#111;}
+  body.night input,body.night textarea, body.night select{background:#444;color:#eee;border:1px solid #666;}
+  label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .items-table{width:100%;border-collapse:collapse;margin-top:8px}
+  .items-table th,.items-table td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+  .items-table th{background:#fafafa;font-weight:600;color:#333}
+  .muted{color:var(--muted);font-size:13px}
+  .btn{display:inline-block;padding:8px 12px;border-radius:6px;border:0;cursor:pointer;font-weight:600}
+  .btn-accent{background:var(--accent);color:#fff}
+  .btn-ghost{background:#fff;border:1px solid #ddd}
+  .flex{display:flex;gap:8px;align-items:center}
+  .right{text-align:right}
+  .invoice-preview{background:#fff;padding:18px;border-radius:8px;margin-top:12px}
+  .invoice-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .logo{font-weight:800;color:var(--accent);font-size:18px}
+  .small{font-size:13px;color:var(--muted)}
+  .totals{width:320px;margin-left:auto}
+  .totals div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee}
+  .no-print{display:block}
+  @media print{
+    body{background:white}
+    .no-print{display:none}
+    .app{margin:0;padding:0;max-width:100%}
+  }
+  .danger{color:#aa0000;font-weight:600}
+  .section{padding:10px;border-radius:6px;margin-bottom:12px;}
+  .section1{background:var(--pastel1);}
+  .section2{background:var(--pastel2);}
+  .section3{background:var(--pastel3);}
+  .section4{background:var(--pastel4);}
+  .section5{background:var(--pastel5);}
+  .section6{background:var(--pastel6);}
 </style>
 </head>
-<body class="theme1">
-
-<!-- Top controls -->
-<div class="topbar no-print">
-  <div class="controls">
-    <button class="btn btn-ghost" id="modeToggle">🌗 Day/Night</button>
-
-    <label class="small">Theme
-      <select id="themeSelect" style="margin-left:8px">
-        <option value="theme1">Pastel Pink</option><option value="theme2">Cream</option><option value="theme3">Beige</option>
-        <option value="theme4">Lavender Blue</option><option value="theme5">Mint</option><option value="theme6">Warm Sand</option>
-        <option value="theme7">Rose Blush</option><option value="theme8">Light Sage</option><option value="theme9">Aqua Soft</option>
-        <option value="theme10">Peach Cream</option><option value="theme11">Lilac Soft</option><option value="theme12">Pastel Green</option>
-      </select>
-    </label>
-
-    <label style="margin-left:8px" class="small"><input type="checkbox" id="appsToggle"/> Activate Apps</label>
-  </div>
-
-  <div class="controls">
-    <button class="btn btn-ghost no-print" id="previewBtn">Preview / Print</button>
-    <button class="btn btn-ghost no-print" id="exportJsonBtn" disabled>Export JSON</button>
-    <button class="btn btn-primary no-print" id="exportPdfBtn" disabled>Export PDF</button>
-  </div>
-</div>
-
-<!-- Header -->
-<div class="header card">
-  <div>
-    <div style="font-weight:800;font-size:20px">Refit Maintenance Services</div>
-    <div class="muted" style="margin-top:6px">SSM Reg No: <strong>201803348973</strong> • Sole proprietorship</div>
-    <div class="small-note" style="margin-top:8px">
-      OG: 10451781060<br>
-      C-08-34, Centum @ Oasis Corporate Park, Oasis Damansara<br>
-      No. 2, Jalan PJU 1A/2, Ara Damansara, 47301 Petaling Jaya<br>
-      Selangor Darul Ehsan<br>
-      Phone: +60 12-2145922 • Email: lyodengck@gmail.com<br>
-      Bank (RHB): 21261100023558
-    </div>
-  </div>
-  <div style="text-align:right">
-    <img id="logoImg" class="logo" src="CB93A44D-3626-47FE-9844-926D465D083E.jpeg" alt="Refit Logo" onerror="this.style.display='none'"/>
-    <div class="muted small-note" style="margin-top:8px">E-Invoice Ready</div>
-  </div>
-</div>
-
-<!-- Main content -->
-<div style="display:flex;gap:18px;margin-top:12px">
-  <!-- left column -->
-  <div style="flex:1">
-    <!-- Invoice metadata -->
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <strong>Invoice details</strong>
-        <span class="muted">Format E-Invoice ready</span>
-      </div>
-      <div style="margin-top:8px" class="row">
-        <div class="col">
-          <label class="small">Invoice No.</label>
-          <input id="invoiceNumber" placeholder="INV-2025-221"/>
-        </div>
-        <div style="width:180px">
-          <label class="small">Invoice Date</label>
-          <input id="invoiceDate" type="date"/>
-        </div>
-      </div>
-      <div style="margin-top:8px" class="row">
-        <div style="width:220px">
-          <label class="small">Document Type</label>
-          <select id="docType"><option>INVOICE</option><option>CREDIT_NOTE</option></select>
-        </div>
-        <div style="width:140px">
-          <label class="small">Currency</label><input id="currency" value="MYR"/>
-        </div>
-        <div style="width:160px">
-          <label class="small">Tax Rate (%)</label><input id="taxRate" type="number" value="0"/>
-        </div>
+<body>
+  <div class="app">
+    <div class="row" style="align-items:center;justify-content:space-between">
+      <h1>Smart Invoice App</h1>
+      <div class="no-print flex">
+        <button class="btn btn-accent" id="toggleMode">Night/Day Mode</button>
+        <button class="btn btn-accent" id="btnPreview">Preview / Print</button>
+        <button class="btn btn-ghost" id="btnReset">Reset</button>
       </div>
     </div>
 
-    <!-- Seller (E-Invoice format) -->
-    <div class="card" style="margin-top:12px">
-      <strong>Seller (pre-filled) — E-Invoice fields</strong>
-      <div style="margin-top:8px" class="row">
-        <div class="col">
-          <label class="small">Company name</label><input id="sellerName" value="Refit Maintenance Services"/>
-        </div>
-        <div style="width:180px">
-          <label class="small">SSM Reg No</label><input id="sellerSSM" value="201803348973"/>
-        </div>
-      </div>
-      <div style="margin-top:8px" class="row">
-        <div class="col"><label class="small">Tax ID / TIN</label><input id="sellerTIN" placeholder="OG/Tax No (if any)"/></div>
-        <div style="width:180px"><label class="small">SST No (if any)</label><input id="sellerSST"/></div>
-      </div>
-      <div style="margin-top:8px">
-        <label class="small">Address (full)</label>
-        <textarea id="sellerAddress">C-08-34, Centum @ Oasis Corporate Park
-Oasis Damansara
-No. 2, Jalan PJU 1A/2, Ara Damansara
-47301 Petaling Jaya
-Selangor Darul Ehsan
-West Malaysia</textarea>
-      </div>
-    </div>
+    <div class="grid" style="grid-template-columns:1fr 420px;gap:14px">
 
-    <!-- Buyer section (save + auto-fill) -->
-    <div class="card" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <strong>Buyer / Customer (save & auto-fill)</strong>
-        <div class="muted small">Enter once → stored locally → auto-fill next time</div>
+      <!-- Left Panel -->
+      <div>
+        <!-- Seller Info -->
+        <div class="card section section1">
+          <label>Seller / Company Info</label>
+          <div class="two">
+            <div>
+              <input id="sellerName" placeholder="Business name" value="Refit Interior" readonly/>
+              <input id="sellerReg" placeholder="SSM / Reg No." value="2025XXXXXX" readonly/>
+              <textarea id="sellerAddress" rows="3" readonly>No. 1, Jalan Contoh, 43000 Kajang, Selangor</textarea>
+            </div>
+            <div>
+              <label class="muted">Contact</label>
+              <input id="sellerPhone" placeholder="Phone / Email" value="+60 12-345 6789" readonly/>
+              <label class="muted">Bank details</label>
+              <input id="bankName" value="Maybank" readonly/>
+              <input id="bankAcc" value="123-456-789 (Refit Interior)" readonly/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buyer Info -->
+        <div class="card section section2">
+          <label>Buyer / Customer</label>
+          <div class="two">
+            <div>
+              <input id="buyerName" placeholder="Customer name"/>
+              <input id="buyerReg" placeholder="Company Reg No. (optional)"/>
+              <textarea id="buyerAddress" rows="3" placeholder="Billing address"></textarea>
+            </div>
+            <div>
+              <label class="muted">Invoice details</label>
+              <input id="invoiceNumber" placeholder="Invoice number" readonly/>
+              <input id="invoiceDate" type="date"/>
+              <input id="dueDate" type="date" placeholder="Due date"/>
+              <label class="muted">SST / Tax (%)</label>
+              <input id="taxRate" type="number" min="0" step="0.1" value="0"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Items -->
+        <div class="card section section3">
+          <label>Invoice Items</label>
+          <table class="items-table" id="itemsTable">
+            <thead>
+              <tr><th>Description</th><th>Qty</th><th>Unit (RM)</th><th>Total (RM)</th><th></th></tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+          <div style="margin-top:8px">
+            <button class="btn btn-ghost" id="addItem">+ Add item</button>
+            <span class="muted" style="margin-left:12px">Tip: use "Design fee / Labour / Materials".</span>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="card section section5 no-print">
+          <label>Notes</label>
+          <textarea id="notes" rows="3" placeholder="Payment within 14 days."></textarea>
+        </div>
       </div>
 
-      <div style="margin-top:8px" class="row">
-        <div class="col">
-          <label class="small">Select saved buyer</label>
-          <select id="buyerSelect"><option value="">-- Select buyer --</option></select>
+      <!-- Right Panel -->
+      <div>
+        <div class="card section section4">
+          <label class="muted">Quick totals</label>
+          <div style="font-size:28px;font-weight:700;color:#222;padding:10px 0" id="grandTotal">RM 0.00</div>
+          <div class="muted" style="margin-top:6px">Subtotal and tax shown in preview.</div>
         </div>
-        <div style="width:140px" class="row">
-          <button class="btn btn-ghost" onclick="loadBuyer()">Load</button>
-          <button class="btn btn-ghost" onclick="deleteBuyer()">Delete</button>
-        </div>
-      </div>
 
-      <div style="margin-top:8px">
-        <label class="small">Buyer name</label><input id="buyerName"/>
-        <label class="small" style="margin-top:6px">Buyer SSM / Reg</label><input id="buyerReg"/>
-        <label class="small" style="margin-top:6px">Buyer TIN (if any)</label><input id="buyerTIN"/>
-        <label class="small" style="margin-top:6px">Buyer address</label><textarea id="buyerAddress"></textarea>
-        <div class="row" style="margin-top:8px">
-          <div class="col"><label class="small">Phone</label><input id="buyerPhone"/></div>
-          <div class="col"><label class="small">Email</label><input id="buyerEmail"/></div>
-        </div>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button class="btn btn-primary" id="saveBuyerBtn" onclick="saveBuyer()">Save Buyer</button>
-          <button class="btn btn-ghost" onclick="clearBuyer()">Clear</button>
+        <div class="card section section6">
+          <div style="display:flex;gap:10px;flex-direction:column">
+            <button class="btn btn-accent no-print" id="btnFillSample">Fill sample data</button>
+            <button class="btn btn-ghost no-print" id="btnExportJSON">Save (JSON)</button>
+            <button class="btn btn-ghost no-print" id="btnLoadJSON">Load (JSON)</button>
+            <input type="file" id="fileInput" style="display:none"/>
+            <button class="btn btn-accent no-print" id="btnGenerateReceipt">Generate Receipt</button>
+            <button class="btn btn-accent no-print" id="btnGenerateDO">Generate DO</button>
+            <button class="btn btn-accent no-print" id="btnGenerateHandover">Generate Handover</button>
+          </div>
+          <div style="margin-top:12px" class="small muted">
+            Use browser Print → Save as PDF for any document.<br/>
+            All data stays local unless exported.
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Items -->
-    <div class="card" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <strong>Items / Services</strong>
-        <div class="muted small">Line-level tax supported</div>
-      </div>
-      <table id="itemsTable">
-        <thead><tr><th>#</th><th>Desc</th><th>UOM</th><th>Qty</th><th>Unit (RM)</th><th class="right">Total (RM)</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <button class="btn btn-ghost" onclick="addItem('','EA',1,0)">+ Add item</button>
-        <div style="margin-left:auto" class="muted small">Tax % (applies to subtotal): <input id="taxRate2" type="number" value="0" style="width:80px;margin-left:8px"/></div>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="card" style="margin-top:12px">
-      <label class="small">Notes</label>
-      <textarea id="notes">Payment due within 14 days.</textarea>
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <button class="btn btn-primary" id="placeOrderBtn" onclick="placeOrder()" disabled>Place Order</button>
-        <button class="btn btn-ghost" onclick="previewInvoice()">Preview</button>
-        <button class="btn btn-ghost" onclick="resetForm()">Reset</button>
-      </div>
-      <div class="muted small-note">Order button active when Buyer is filled and at least 1 item exists.</div>
-    </div>
+    <!-- Preview -->
+    <div id="previewArea" class="invoice-preview" style="display:none"></div>
 
   </div>
-
-  <!-- right column -->
-  <div class="right-panel">
-    <div class="card">
-      <strong>Invoice Preview</strong>
-      <div id="preview" style="margin-top:8px"></div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <strong>Saved Orders</strong>
-      <div id="orders" style="margin-top:8px"></div>
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <button class="btn btn-ghost" onclick="exportAll()">Export All Data</button>
-        <button class="btn btn-ghost" onclick="clearAll()">Clear All Data</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Install prompt toast -->
-<div id="installToast" class="install-toast" style="display:none">
-  <div style="margin-bottom:8px">Install this app for quicker access.</div>
-  <div style="display:flex;gap:8px"><button id="installBtn" class="btn btn-primary">Install</button><button onclick="document.getElementById('installToast').style.display='none'" class="btn btn-ghost">Close</button></div>
-</div>
-
-<!-- html2pdf CDN for Export PDF (works client-side) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-/* -------------------- Utilities & storage keys -------------------- */
-const KEY_BUYERS = 'refit_buyers_v2';
-const KEY_ORDERS = 'refit_orders_v2';
-const KEY_THEME = 'refit_theme_v2';
-const KEY_APPS = 'refit_apps_v2';
-const KEY_LAST_INV = 'refit_last_inv_v2';
+  const $=id=>document.getElementById(id);
+  const fmt=n=>'RM '+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-function $(id){ return document.getElementById(id); }
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  // Day/Night mode toggle
+  $('toggleMode').onclick = ()=>{ document.body.classList.toggle('night'); }
 
-/* -------------------- Theme & mode -------------------- */
-function initTheme(){
-  const saved = localStorage.getItem(KEY_THEME) || 'theme1';
-  document.body.className = saved;
-  if(localStorage.getItem('refit_dark') === 'true') document.body.classList.add('dark');
-  $('themeSelect').value = saved;
-}
-$('themeSelect').addEventListener('change', e=>{
-  const cls = e.target.value;
-  const dark = document.body.classList.contains('dark') ? ' dark' : '';
-  document.body.className = cls + dark;
-  localStorage.setItem(KEY_THEME, cls);
-});
-
-$('modeToggle').addEventListener('click', ()=>{
-  document.body.classList.toggle('dark');
-  localStorage.setItem('refit_dark', document.body.classList.contains('dark'));
-});
-
-/* -------------------- PWA install & service worker (dynamic) -------------------- */
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  $('installToast').style.display = 'block';
-});
-$('installBtn').addEventListener('click', async ()=>{
-  $('installToast').style.display = 'none';
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    deferredPrompt = null;
+  // Auto-increment running invoice number
+  let invoiceCounter = 1;
+  function generateInvoiceNumber(){
+    const year = new Date().getFullYear();
+    return 'REF-'+year+'-'+String(invoiceCounter++).padStart(3,'0');
   }
-});
 
-/* register simple service worker from blob so the file can be installable offline */
-(function(){
-  try{
-    const swCode = `
-      self.addEventListener('install', event => { self.skipWaiting(); });
-      self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); });
-      self.addEventListener('fetch', function(e){ /* bypass - allow network */ });
-    `;
-    const blob = new Blob([swCode], {type:'application/javascript'});
-    const swUrl = URL.createObjectURL(blob);
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register(swUrl).catch(()=>{/* ignore */});
-    }
-  }catch(e){}
-})();
-
-/* -------------------- Buyers (localStorage) -------------------- */
-function loadBuyers(){ try{ return JSON.parse(localStorage.getItem(KEY_BUYERS) || '[]'); }catch(e){ return []; } }
-function saveBuyers(arr){ localStorage.setItem(KEY_BUYERS, JSON.stringify(arr)); refreshBuyers(); }
-
-function refreshBuyers(){
-  const sel = $('buyerSelect'); sel.innerHTML = '<option value="">-- Select buyer --</option>';
-  const buyers = loadBuyers();
-  buyers.forEach(b=>{ const o = document.createElement('option'); o.value=b.id; o.textContent = b.name + (b.reg ? ' • ' + b.reg : ''); sel.appendChild(o); });
-}
-
-function saveBuyer(){
-  const name = $('buyerName').value.trim(); if(!name){ alert('Enter buyer name'); return; }
-  const buyer = { id: uid(), name, reg: $('buyerReg').value.trim(), tin: $('buyerTIN').value.trim(), address: $('buyerAddress').value.trim(), phone: $('buyerPhone').value.trim(), email: $('buyerEmail').value.trim() };
-  const arr = loadBuyers(); arr.push(buyer); saveBuyers(arr);
-  alert('Buyer saved. It will auto-fill for future invoices.');
-  clearBuyer();
-}
-function loadBuyer(){
-  const id = $('buyerSelect').value; if(!id) { alert('Select buyer'); return; }
-  const b = loadBuyers().find(x=>x.id===id); if(!b) return;
-  $('buyerName').value = b.name; $('buyerReg').value = b.reg; $('buyerTIN').value = b.tin; $('buyerAddress').value = b.address; $('buyerPhone').value=b.phone; $('buyerEmail').value=b.email;
-  updateUIState();
-}
-function deleteBuyer(){
-  const id = $('buyerSelect').value; if(!id) { alert('Select buyer'); return; }
-  let arr = loadBuyers(); arr = arr.filter(x=>x.id!==id); saveBuyers(arr); alert('Buyer deleted'); clearBuyer();
-}
-function clearBuyer(){ $('buyerName').value=''; $('buyerReg').value=''; $('buyerTIN').value=''; $('buyerAddress').value=''; $('buyerPhone').value=''; $('buyerEmail').value=''; $('buyerSelect').value=''; updateUIState(); }
-
-/* -------------------- Items handling -------------------- */
-function addItem(desc='Description', uom='EA', qty=1, unit=0){
-  const tbody = document.querySelector('#itemsTable tbody');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td class="small"></td>
-    <td><input class="i-desc" value="${desc}"/></td>
-    <td><input class="i-uom" value="${uom}" style="width:80px"/></td>
-    <td><input class="i-qty" type="number" value="${qty}" style="width:80px"/></td>
-    <td><input class="i-unit" type="number" step="0.01" value="${unit.toFixed(2)}" style="width:110px"/></td>
-    <td class="right i-total">RM 0.00</td>
-    <td><button class="btn btn-ghost" onclick="this.closest('tr').remove(); updateItems()">Remove</button></td>`;
-  tbody.appendChild(tr);
-  Array.from(tr.querySelectorAll('input')).forEach(i=>i.addEventListener('input', updateItems));
-  updateItems();
-}
-
-function readItems(){
-  return [...document.querySelectorAll('#itemsTable tbody tr')].map(tr=>{
-    return {
-      desc: tr.querySelector('.i-desc').value || '',
-      uom: tr.querySelector('.i-uom').value || '',
-      qty: Number(tr.querySelector('.i-qty').value) || 0,
-      unit: Number(tr.querySelector('.i-unit').value) || 0
-    };
-  });
-}
-
-function updateItems(){
-  const items = readItems();
-  let subtotal = 0;
-  const rows = document.querySelectorAll('#itemsTable tbody tr');
-  rows.forEach((r,i)=>{
-    const it = items[i];
-    const total = +(it.qty * it.unit).toFixed(2);
-    subtotal += total;
-    r.querySelector('.i-total').textContent = formatRM(total);
-    r.querySelector('td').textContent = i+1;
-  });
-  const taxPercent = Number($('taxRate2').value) || Number($('taxRate').value) || 0;
-  const tax = +(subtotal * taxPercent / 100).toFixed(2);
-  const total = +(subtotal + tax).toFixed(2);
-  window._calc = { subtotal, tax, total, taxPercent };
-  updatePreview();
-  updateUIState();
-}
-
-/* -------------------- Preview / Export -------------------- */
-function formatRM(x){ return 'RM ' + Number(x || 0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-
-function updatePreview(){
-  const items = readItems();
-  const buyer = { name: $('buyerName').value, reg: $('buyerReg').value, tin: $('buyerTIN').value, address: $('buyerAddress').value };
-  const seller = { name: $('sellerName').value, ssm: $('sellerSSM').value, tin: $('sellerTIN').value, address: $('sellerAddress').value };
-  const info = {
-    invoiceNumber: $('invoiceNumber').value || localStorage.getItem(KEY_LAST_INV) || '',
-    invoiceDate: $('invoiceDate').value,
-    docType: $('docType').value,
-    currency: $('currency').value,
-    seller, buyer, items, notes: $('notes').value, summary: window._calc || {subtotal:0,tax:0,total:0}
-  };
-
-  let html = `<div style="font-size:14px"><strong>Invoice:</strong> ${escape(info.invoiceNumber)}<br><span class="muted">Date: ${escape(info.invoiceDate)}</span></div>`;
-  html += `<div style="margin-top:8px"><strong>Seller</strong><div class="muted">${escape(seller.name)} • SSM: ${escape(seller.ssm)} • TIN: ${escape(seller.tin)}</div><div>${escape(seller.address).replaceAll('\\n','<br/>')}</div></div>`;
-  html += `<div style="margin-top:8px"><strong>Buyer</strong><div class="muted">${escape(buyer.name)} • Reg: ${escape(buyer.reg)} • TIN: ${escape(buyer.tin)}</div><div>${escape(buyer.address).replaceAll('\\n','<br/>')}</div></div>`;
-  html += `<table style="width:100%;margin-top:8px"><thead><tr><th>#</th><th>Description</th><th>UOM</th><th>Qty</th><th class="right">Unit (RM)</th><th class="right">Total (RM)</th></tr></thead><tbody>`;
-  items.forEach((it,i)=> html += `<tr><td>${i+1}</td><td>${escape(it.desc)}</td><td>${escape(it.uom)}</td><td>${it.qty}</td><td class="right">${(it.unit).toFixed(2)}</td><td class="right">${formatRM(it.qty*it.unit)}</td></tr>`);
-  html += `</tbody></table>`;
-  html += `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between"><div>Subtotal</div><div>${formatRM((window._calc||{}).subtotal||0)}</div></div><div style="display:flex;justify-content:space-between"><div>Tax (${(window._calc||{}).taxPercent||0}%)</div><div>${formatRM((window._calc||{}).tax||0)}</div></div><div style="display:flex;justify-content:space-between;font-weight:700"><div>Total</div><div>${formatRM((window._calc||{}).total||0)}</div></div></div>`;
-  html += `<div style="margin-top:8px" class="muted small-note"><strong>Notes:</strong> ${escape($('notes').value)}</div>`;
-  $('preview').innerHTML = html;
-}
-
-/* -------------------- Orders (save/export) -------------------- */
-function loadOrders(){ try{ return JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]'); }catch(e){return []; } }
-function saveOrders(arr){ localStorage.setItem(KEY_ORDERS, JSON.stringify(arr)); refreshOrders(); }
-function refreshOrders(){
-  const list = $('orders'); list.innerHTML = '';
-  const arr = loadOrders();
-  if(!arr.length){ list.innerHTML = '<div class="muted small-note">No saved orders</div>'; return; }
-  arr.slice(0,20).forEach(o=>{
-    const d = document.createElement('div'); d.style.padding='8px'; d.style.borderBottom='1px solid rgba(0,0,0,0.04)';
-    d.innerHTML = `<div style="display:flex;justify-content:space-between"><div><strong>${escape(o.invoiceNumber)}</strong><div class="muted small">${new Date(o.date).toLocaleString()}</div></div>
-      <div><button class="btn btn-ghost" onclick='loadOrder("${o.id}")'>Load</button></div></div><div class="muted small-note">${escape(o.buyer?.name||'')}</div>`;
-    list.appendChild(d);
-  });
-}
-
-function placeOrder(){
-  if(!$('buyerName').value.trim()){ alert('Please enter buyer details before placing order'); return; }
-  const order = {
-    id: uid(),
-    invoiceNumber: $('invoiceNumber').value || ('INV-' + new Date().toISOString().slice(0,10)),
-    date: new Date().toISOString(),
-    buyer: { name: $('buyerName').value, reg: $('buyerReg').value, tin: $('buyerTIN').value, address: $('buyerAddress').value },
-    items: readItems(),
-    summary: window._calc || {subtotal:0,tax:0,total:0},
-    notes: $('notes').value
-  };
-  const arr = loadOrders(); arr.unshift(order); saveOrders(arr);
-  localStorage.setItem(KEY_LAST_INV, order.invoiceNumber);
-  alert('Order saved locally (ID: ' + order.id + ')');
-  updateUIState();
-}
-
-function loadOrder(id){
-  const arr = loadOrders(); const o = arr.find(x=>x.id===id); if(!o) return;
-  $('invoiceNumber').value = o.invoiceNumber; $('invoiceDate').value = o.date.slice(0,10); $('buyerName').value = o.buyer.name; $('buyerReg').value = o.buyer.reg; $('buyerTIN').value=o.buyer.tin; $('buyerAddress').value=o.buyer.address;
-  // load items
-  const tbody = document.querySelector('#itemsTable tbody'); tbody.innerHTML = '';
-  (o.items||[]).forEach(it=> addItem(it.desc, it.uom||'EA', it.qty||it.quantity||1, it.unit||it.unitPrice||0));
-  updateItems(); updatePreview();
-}
-
-/* -------------------- Export JSON & PDF -------------------- */
-function exportJSON(){
-  const payload = {
-    invoiceNumber: $('invoiceNumber').value || ('INV-' + new Date().toISOString().slice(0,10)),
-    invoiceDate: $('invoiceDate').value,
-    docType: $('docType').value,
-    currency: $('currency').value,
-    seller: { name: $('sellerName').value, ssm: $('sellerSSM').value, tin: $('sellerTIN').value, sst: $('sellerSST').value, address: $('sellerAddress').value },
-    buyer: { name: $('buyerName').value, reg: $('buyerReg').value, tin: $('buyerTIN').value, address: $('buyerAddress').value, phone: $('buyerPhone').value, email: $('buyerEmail').value },
-    lines: readItems().map((it,i)=>({ lineNo: i+1, description: it.desc, uom: it.uom, qty: it.qty, unitPrice: it.unit })),
-    summary: window._calc || {subtotal:0,tax:0,total:0},
-    notes: $('notes').value
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (payload.invoiceNumber || 'invoice') + '.json'; a.click(); URL.revokeObjectURL(a.href);
-}
-
-function exportPDF(){
-  updatePreview();
-  const opt = {
-    margin:       10,
-    filename:     ($('invoiceNumber').value || 'invoice') + '.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  // create a printable node
-  const node = document.createElement('div'); node.style.padding='18px'; node.innerHTML = $('preview').innerHTML;
-  const title = document.createElement('div'); title.style.fontWeight='800'; title.style.marginBottom='8px'; title.textContent = $('sellerName').value || 'Refit Maintenance Services';
-  node.prepend(title);
-  html2pdf().set(opt).from(node).save();
-}
-
-/* -------------------- Helpers & UI state -------------------- */
-function updateUIState(){
-  updatePreview();
-  const hasBuyer = $('buyerName').value.trim() !== '';
-  const hasItems = readItems().length > 0;
-  $('placeOrderBtn').disabled = !(hasBuyer && hasItems);
-  const apps = localStorage.getItem(KEY_APPS) === '1';
-  $('exportJsonBtn').disabled = !(apps && hasBuyer && hasItems);
-  $('exportPdfBtn').disabled = !(apps && hasBuyer && hasItems);
-}
-
-function escape(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-/* -------------------- Persistence: init & load -------------------- */
-function init(){
-  initTheme();
-  refreshBuyers();
-  refreshOrders();
-  // defaults
-  $('invoiceNumber').value = localStorage.getItem(KEY_LAST_INV) || 'INV-2025-221';
-  $('invoiceDate').value = new Date().toISOString().slice(0,10);
-  // add sample items if none
-  if(document.querySelectorAll('#itemsTable tbody tr').length===0){
-    addItem('Design fee (flat rate)','EA',1,1200.00);
-    addItem('Materials (tiles, paints)','EA',1,650.00);
-    addItem('Labour (installation)','HOUR',8,80.00);
+  // Create row
+  const itemsBody = $('itemsBody');
+  function createRow(desc='', qty=1, unit=0){
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td><input value="${desc}" placeholder="Description" oninput="updateAll()"></td>
+                    <td><input type="number" min="0" step="1" value="${qty}" oninput="updateAll()"></td>
+                    <td><input type="number" min="0" step="0.01" value="${unit}" oninput="updateAll()"></td>
+                    <td class="right">${fmt(qty*unit)}</td>
+                    <td><button class="btn btn-ghost" onclick="this.closest('tr').remove(); updateAll();">Remove</button></td>`;
+    itemsBody.appendChild(tr);
+    updateAll();
   }
-  // apps toggle
-  const apps = localStorage.getItem(KEY_APPS) === '1';
-  $('appsToggle').checked = apps;
-  toggleAppsMode(apps);
-  // event wiring
-  $('appsToggle').addEventListener('change', e=>{ toggleAppsMode(e.target.checked); });
-  $('previewBtn').addEventListener('click', ()=>{ updatePreview(); window.print(); });
-  $('exportJsonBtn').addEventListener('click', exportJSON);
-  $('exportPdfBtn').addEventListener('click', exportPDF);
-  ['invoiceNumber','invoiceDate','taxRate','taxRate2','notes'].forEach(id=>{ if($(id)) $(id).addEventListener('input', updateUIState); });
-  updateItems();
-  setInterval(()=>{ /* autosave last invoice number */ localStorage.setItem(KEY_LAST_INV, $('invoiceNumber').value || ''); }, 30000);
-}
 
-function toggleAppsMode(enabled){
-  localStorage.setItem(KEY_APPS, enabled ? '1' : '0');
-  // enable export buttons only if apps active and invoice valid
-  updateUIState();
-}
+  function readRows(){
+    return [...itemsBody.querySelectorAll('tr')].map(tr=>{
+      const inputs = tr.querySelectorAll('input');
+      return {desc:inputs[0].value, qty:Number(inputs[1].value), unit:Number(inputs[2].value)};
+    });
+  }
 
-/* Export/clear all */
-function exportAll(){ const blob = new Blob([JSON.stringify({buyers: loadBuyers(), orders: loadOrders(), lastInv: localStorage.getItem(KEY_LAST_INV)}, null, 2)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='refit_data_export.json'; a.click(); URL.revokeObjectURL(a.href); }
-function clearAll(){ if(confirm('Clear all stored buyers and orders?')){ localStorage.removeItem(KEY_BUYERS); localStorage.removeItem(KEY_ORDERS); localStorage.removeItem(KEY_LAST_INV); refreshBuyers(); refreshOrders(); updateUIState(); alert('Cleared'); } }
+  function updateAll(){
+    let subtotal=0;
+    [...itemsBody.querySelectorAll('tr')].forEach(tr=>{
+      const inputs=tr.querySelectorAll('input');
+      const qty=Number(inputs[1].value)||0;
+      const unit=Number(inputs[2].value)||0;
+      tr.children[3].textContent=fmt(qty*unit);
+      subtotal+=qty*unit;
+    });
+    const taxRate=Number($('taxRate').value)||0;
+    const tax=subtotal*taxRate/100;
+    const grand=subtotal+tax;
+    $('grandTotal').textContent=fmt(grand);
+  }
 
-function resetForm(){ if(confirm('Reset form?')) location.reload(); }
+  $('addItem').onclick = ()=>createRow('','1','0.00');
 
-/* -------------------- Init on load -------------------- */
-window.addEventListener('load', init);
-window.addEventListener('resize', updatePreview);
+  $('btnPreview').onclick = ()=>{
+    if(itemsBody.children.length===0) createRow('Service','1','0.00');
+    updateAll();
+    const rows = readRows();
+    const d = $('invoiceDate').value ? new Date($('invoiceDate').value) : new Date();
+    const due = $('dueDate').value ? new Date($('dueDate').value) : new Date(d.getTime()+14*24*60*60*1000);
+    const previewHTML = `
+      <div class="invoice-header">
+        <div><div class="logo">${$('sellerName').value}</div>
+        <div class="small">${$('sellerAddress').value}</div>
+        <div class="small">${$('sellerPhone').value}</div>
+        <div class="small">${$('bankName').value} • ${$('bankAcc').value}</div></div>
+        <div style="text-align:right">
+          <div class="small">Invoice</div>
+          <div style="font-weight:700;font-size:18px">${$('invoiceNumber').value}</div>
+          <div class="small">${d.toLocaleDateString()}</div>
+          <div class="small">Due: ${due.toLocaleDateString()}</div>
+        </div>
+      </div>
+      <hr>
+      <div style="display:flex;justify-content:space-between">
+        <div><div class="small">Bill to</div>
+        <div style="font-weight:700">${$('buyerName').value}</div>
+        <div class="small">${$('buyerAddress').value}</div></div>
+        <div class="small">${$('buyerReg').value ? 'Reg No: '+$('buyerReg').value : ''}</div>
+      </div>
+      <table class="items-table" style="margin-top:10px">
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit (RM)</th><th>Total (RM)</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td>${r.desc}</td><td>${r.qty}</td><td>${fmt(r.unit).replace('RM ','')}</td><td class="right">${fmt(r.qty*r.unit)}</td></tr>`).join('')}</tbody>
+      </table>
+      <div class="totals" style="margin-top:12px">
+        <div><div class="small">Subtotal</div><div class="right small">${fmt(rows.reduce((a,b)=>a+b.qty*b.unit,0))}</div></div>
+        <div><div class="small">SST (${Number($('taxRate').value).toFixed(1)}%)</div><div class="right small">${fmt(rows.reduce((a,b)=>a+b.qty*b.unit,0)*Number($('taxRate').value)/100)}</div></div>
+        <div style="font-weight:700;font-size:18px"><div>Total</div><div class="right">${fmt(rows.reduce((a,b)=>a+b.qty*b.unit,0)*(1+Number($('taxRate').value)/100))}</div></div>
+      </div>
+      <div style="margin-top:18px" class="small">${$('notes').value}</div>`;
+    $('previewArea').innerHTML = previewHTML;
+    $('previewArea').style.display='block';
+    window.scrollTo(0, document.body.scrollHeight);
+    setTimeout(()=>window.print(),600);
+  }
+
+  $('btnReset').onclick = ()=>location.reload();
+
+  $('btnFillSample').onclick = ()=>{
+    $('buyerName').value='Client Sdn Bhd';
+    $('buyerAddress').value='No. 2, Jalan Utama, 43000 Kajang';
+    $('invoiceNumber').value=generateInvoiceNumber();
+    const today = new Date().toISOString().slice(0,10);
+    $('invoiceDate').value=today;
+    const due = new Date(); due.setDate(due.getDate()+14);
+    $('dueDate').value=due.toISOString().slice(0,10);
+    $('taxRate').value=0;
+    $('notes').value='Payment due within 14 days. Please transfer to bank account above.';
+    itemsBody.innerHTML='';
+    createRow('Design fee (flat rate)',1,1200.00);
+    createRow('Materials (tiles, paints)',1,650.00);
+    createRow('Labour (installation)',8,80.00);
+  }
+
+  // JSON save/load
+  $('btnExportJSON').onclick = ()=>{
+    const payload={sellerName:$('sellerName').value,sellerReg:$('sellerReg').value,sellerAddress:$('sellerAddress').value,
+      sellerPhone:$('sellerPhone').value,bankName:$('bankName').value,bankAcc:$('bankAcc').value,
+      buyerName:$('buyerName').value,buyerReg:$('buyerReg').value,buyerAddress:$('buyerAddress').value,
+      invoiceNumber:$('invoiceNumber').value,invoiceDate:$('invoiceDate').value,dueDate:$('dueDate').value,
+      taxRate:$('taxRate').value,notes:$('notes').value,items:readRows()};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(payload.invoiceNumber||'invoice')+'.json'; a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  $('btnLoadJSON').onclick = ()=>$('fileInput').click();
+  $('fileInput').onchange = e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=function(){
+      try{
+        const obj=JSON.parse(r.result);
+        Object.keys(obj).forEach(k=>{if($(k)) $(k).value=obj[k];});
+        itemsBody.innerHTML='';
+        (obj.items||[]).forEach(it=>createRow(it.desc,it.qty,it.unit));
+        updateAll();
+      }catch(err){alert('Failed to load: '+err.message);}
+    }; r.readAsText(f);
+  }
+
+  // Generate Receipt / DO / Handover letter
+  function generateSimpleDoc(title){
+    if(itemsBody.children.length===0) createRow('Service','1','0.00');
+    updateAll();
+    const rows = readRows();
+    const today = new Date();
+    const html = `<h2>${title}</h2>
+    <p>Date: ${today.toLocaleDateString()}</p>
+    <p>From: ${$('sellerName').value}, ${$('sellerAddress').value}</p>
+    <p>To: ${$('buyerName').value}, ${$('buyerAddress').value}</p>
+    <table class="items-table" style="margin-top:10px">
+      <thead><tr><th>Description</th><th>Qty</th><th>Unit (RM)</th><th>Total (RM)</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td>${r.desc}</td><td>${r.qty}</td><td>${fmt(r.unit).replace('RM ','')}</td><td class="right">${fmt(r.qty*r.unit)}</td></tr>`).join('')}</tbody>
+    </table>`;
+    const win=window.open(); win.document.write(html); win.print();
+  }
+  $('btnGenerateReceipt').onclick=()=>generateSimpleDoc('Receipt');
+  $('btnGenerateDO').onclick=()=>generateSimpleDoc('Delivery Order (DO)');
+  $('btnGenerateHandover').onclick=()=>generateSimpleDoc('Project Completion / Handover Letter');
+
+  // init first row
+  createRow('','1','0.00');
 </script>
 </body>
 </html>
