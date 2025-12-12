@@ -2,217 +2,185 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Refit Invoice Generator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Invoice - Refit Maintenance Services</title>
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 20px;
+        margin: 40px;
+        color: #000;
     }
 
-    .container {
-        max-width: 900px;
-        margin: auto;
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    h1 {
+        text-align: right;
+        font-size: 20px;
+        margin-bottom: 20px;
     }
 
     .header {
         display: flex;
-        align-items: center;
-        gap: 20px;
+        justify-content: space-between;
+        border-bottom: 1px solid #000;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
     }
 
-    .header img {
-        width: 120px;
-        border-radius: 10px;
-    }
-
-    h2 {
-        margin-top: 0;
-    }
-
-    .company-details {
+    .left-box, .right-box {
+        width: 48%;
         font-size: 14px;
-        line-height: 1.6;
-    }
-
-    /* 🔥 ALL BUTTON WORDING IN BLACK */
-    button {
-        padding: 10px 15px;
-        border: none;
-        background: #007bff;
-        color: black !important;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: bold;
-    }
-
-    button:hover {
-        background: #0056b3;
-    }
-
-    .controls {
-        margin-top: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .pastel-block {
-        padding: 18px;
-        margin: 15px 0;
-        border-radius: 10px;
-        font-size: 1rem;
-        transition: all 0.3s ease-in-out;
+        white-space: pre-line;
     }
 
     .section-title {
         font-weight: bold;
-        margin-bottom: 8px;
-        font-size: 1.1rem;
-    }
-
-    input, textarea {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        border-radius: 6px;
-        border: 1px solid #ddd;
-    }
-
-    #invoice-output {
         margin-top: 25px;
-        padding: 20px;
-        background: #fafafa;
-        border-radius: 10px;
-        border: 2px dashed #ccc;
+        margin-bottom: 5px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    table, th, td {
+        border: 1px solid #000;
+        font-size: 14px;
+    }
+
+    th {
+        background: #fff;
+        font-weight: bold;
+        text-align: center;
+        padding: 6px;
+    }
+
+    td {
+        padding: 8px;
+        vertical-align: top;
+    }
+
+    .right {
+        text-align: right;
+    }
+
+    .signature {
+        margin-top: 50px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+    }
+
+    .lang-btn {
+        padding: 6px 14px;
+        margin-bottom: 20px;
+        border: 1px solid #000;
+        background: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        color: #000;
     }
 </style>
-</head>
-
-<body>
-
-<div class="container">
-    <!-- HEADER -->
-    <div class="header">
-        <img src="YOUR_LOGO_IMAGE.jpg" alt="Company Logo">
-        <div>
-            <h2>Refit Maintenance Services</h2>
-            <div class="company-details">
-                Sole Proprietorship<br>
-                Reg No: 201803348973<br>
-                C-08-34, Centum @ Oasis Corporate Park,<br>
-                Oasis Damansara, No.2 Jalan PJU 1A/2,<br>
-                Ara Damansara, 47301 Petaling Jaya,<br>
-                Selangor Darul Ehsan, West Malaysia.<br><br>
-                Bank: RHB Bank<br>
-                Acc No: 2126 1100 0235 58
-            </div>
-        </div>
-    </div>
-
-    <!-- BUTTON CONTROLS -->
-    <div class="controls">
-        <button onclick="setDocType('Quotation')">Create Quotation</button>
-        <button onclick="setDocType('Invoice')">Create Invoice</button>
-        <button onclick="setDocType('Receipt')">Create Receipt</button>
-        <button onclick="setDocType('PO')">Create Purchase Order</button>
-        <button onclick="setDocType('DO')">Create Delivery Order</button>
-        <button onclick="window.print()">Print / Save PDF</button>
-    </div>
-
-    <!-- PASTEL SECTIONS -->
-    <div class="pastel-block" style="background:#F8D7DA;">
-        <div class="section-title">Client Information</div>
-        <textarea id="clientInfo" placeholder="Enter client name, address, contact..."></textarea>
-    </div>
-
-    <div class="pastel-block" style="background:#D1ECF1;">
-        <div class="section-title">Project / Service Description</div>
-        <textarea id="description" placeholder="Describe work or service provided..."></textarea>
-    </div>
-
-    <div class="pastel-block" style="background:#E2F0CB;">
-        <div class="section-title">Itemised Details</div>
-        <textarea id="items" placeholder="List items, qty, unit price..."></textarea>
-    </div>
-
-    <div class="pastel-block" style="background:#FFF3CD;">
-        <div class="section-title">Amount Summary</div>
-        <textarea id="amount" placeholder="Subtotal, discount, total amount..."></textarea>
-    </div>
-
-    <div class="pastel-block" style="background:#E8DFF5;">
-        <div class="section-title">Additional Notes</div>
-        <textarea id="notes" placeholder="Payment terms, warranty notes, etc..."></textarea>
-    </div>
-
-    <div class="pastel-block" style="background:#D6EAF8;">
-        <div class="section-title">Internal Remarks (Optional)</div>
-        <textarea id="remarks" placeholder="Internal office-only remarks..."></textarea>
-    </div>
-
-    <button onclick="generateInvoice()" style="margin-top:20px;background:#28a745;">Generate Document</button>
-
-    <div id="invoice-output"></div>
-
-</div>
 
 <script>
-let docType = "Invoice";
-let invoiceCounter = 221;
+function switchLanguage(lang) {
+    if (lang === 'my') {
+        document.getElementById("title").innerText = "INVOIS";
 
-function setDocType(type) {
-    docType = type;
-    alert(type + " mode activated.");
+        document.getElementById("companyLabel").innerText = "BUTIRAN SYARIKAT:";
+        document.getElementById("buyerLabel").innerText = "BUTIRAN PELANGGAN:";
+
+        document.getElementById("colItem").innerText = "PERKARA";
+        document.getElementById("colUnit").innerText = "HARGA SEUNIT";
+        document.getElementById("colQty").innerText = "BILANGAN";
+        document.getElementById("colPrice").innerText = "HARGA";
+
+        document.getElementById("totalLabel").innerText = "JUMLAH HARGA";
+        document.getElementById("sign1").innerText = "Tanda Tangan Penerima:";
+        document.getElementById("sign2").innerText = "Tanda Tangan Pengurus:";
+    } else {
+        document.getElementById("title").innerText = "INVOICE";
+
+        document.getElementById("companyLabel").innerText = "COMPANY DETAILS:";
+        document.getElementById("buyerLabel").innerText = "BUYER DETAILS:";
+
+        document.getElementById("colItem").innerText = "DESCRIPTION";
+        document.getElementById("colUnit").innerText = "UNIT PRICE";
+        document.getElementById("colQty").innerText = "QTY";
+        document.getElementById("colPrice").innerText = "AMOUNT";
+
+        document.getElementById("totalLabel").innerText = "TOTAL AMOUNT";
+        document.getElementById("sign1").innerText = "Receiver Signature:";
+        document.getElementById("sign2").innerText = "Manager Signature:";
+    }
 }
-
-// AUTO TEXT COLOR BASED ON BG
-function setContrastText() {
-    const blocks = document.querySelectorAll('.pastel-block');
-
-    blocks.forEach(block => {
-        const bg = window.getComputedStyle(block).backgroundColor;
-        const rgb = bg.match(/\d+/g);
-        if (!rgb) return;
-
-        const r = parseInt(rgb[0], 10);
-        const g = parseInt(rgb[1], 10);
-        const b = parseInt(rgb[2], 10);
-
-        const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-
-        block.style.color = brightness > 150 ? "#000" : "#FFF";
-    });
-}
-
-function generateInvoice() {
-    const today = new Date().toISOString().split('T')[0];
-    const ref = "INV-2025-" + invoiceCounter++;
-
-    document.getElementById("invoice-output").innerHTML = `
-        <h3>${docType}</h3>
-        <p><b>Date:</b> ${today}</p>
-        <p><b>Document Ref:</b> ${ref}</p>
-        <hr>
-        <p><b>Client:</b><br>${document.getElementById("clientInfo").value.replace(/\n/g,"<br>")}</p>
-        <p><b>Description:</b><br>${document.getElementById("description").value.replace(/\n,g,"<br>")}</p>
-        <p><b>Items:</b><br>${document.getElementById("items").value.replace(/\n/g,"<br>")}</p>
-        <p><b>Amount:</b><br>${document.getElementById("amount").value.replace(/\n/g,"<br>")}</p>
-        <p><b>Notes:</b><br>${document.getElementById("notes").value.replace(/\n/g,"<br>")}</p>
-        <p><b>Remarks:</b><br>${document.getElementById("remarks").value.replace(/\n/g,"<br>")}</p>
-    `;
-}
-
-window.onload = setContrastText;
 </script>
+
+</head>
+<body>
+
+<button class="lang-btn" onclick="switchLanguage('en')">English</button>
+<button class="lang-btn" onclick="switchLanguage('my')">Bahasa Melayu</button>
+
+<h1 id="title">INVOICE</h1>
+
+<div class="header">
+    <!-- LEFT SIDE: COMPANY DETAILS -->
+    <div class="left-box">
+        <b id="companyLabel">COMPANY DETAILS:</b><br><br>
+        <b>Refit Maintenance Services</b><br>
+        Sole Proprietorship<br>
+        Reg No: 201803348973 / TIN No: OG 10451781060<br>
+        C-08-34, Centum @ Oasis Corporate Park,<br>
+        Oasis Damansara, No.2 Jalan PJU 1A/2,<br>
+        Ara Damansara, 47301 Petaling Jaya,<br>
+        Selangor Darul Ehsan, West Malaysia.<br><br>
+        Bank: RHB Bank<br>
+        Acc No: 2126 1100 0235 58
+    </div>
+
+    <!-- RIGHT SIDE: BUYER DETAILS -->
+    <div class="right-box">
+        <b id="buyerLabel">BUYER DETAILS:</b><br><br>
+        <textarea style="width:100%; height:140px; border:1px solid #000; padding:5px;">
+Enter buyer name...
+Enter address...
+Enter contact details...
+        </textarea>
+    </div>
+</div>
+
+<!-- TABLE -->
+<table>
+    <tr>
+        <th id="colItem">DESCRIPTION</th>
+        <th id="colUnit">UNIT PRICE</th>
+        <th id="colQty">QTY</th>
+        <th id="colPrice">AMOUNT</th>
+    </tr>
+
+    <tr>
+        <td contenteditable="true">Service description here...</td>
+        <td contenteditable="true" class="right">RM 0.00</td>
+        <td contenteditable="true" class="right">1</td>
+        <td contenteditable="true" class="right">RM 0.00</td>
+    </tr>
+</table>
+
+<!-- TOTAL -->
+<table style="margin-top:0;">
+    <tr>
+        <td style="border:none;"></td>
+        <td style="border:none;"></td>
+        <td id="totalLabel" style="font-weight:bold; text-align:right;">TOTAL AMOUNT</td>
+        <td class="right" contenteditable="true" style="font-weight:bold;">RM 0.00</td>
+    </tr>
+</table>
+
+<!-- SIGNATURES -->
+<div class="signature">
+    <div id="sign1">Receiver Signature:</div>
+    <div id="sign2">Manager Signature:</div>
+</div>
 
 </body>
 </html>
