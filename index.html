@@ -42,25 +42,27 @@
         line-height: 1.6;
     }
 
+    /* 🔥 ALL BUTTON WORDING IN BLACK */
+    button {
+        padding: 10px 15px;
+        border: none;
+        background: #007bff;
+        color: black !important;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+
     .controls {
         margin-top: 20px;
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-    }
-
-    button {
-        padding: 10px 15px;
-        border: none;
-        background: #007bff;
-        color: white;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-
-    button:hover {
-        background: #0056b3;
     }
 
     .pastel-block {
@@ -116,6 +118,7 @@
         </div>
     </div>
 
+    <!-- BUTTON CONTROLS -->
     <div class="controls">
         <button onclick="setDocType('Quotation')">Create Quotation</button>
         <button onclick="setDocType('Invoice')">Create Invoice</button>
@@ -125,7 +128,7 @@
         <button onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <!-- Pastel Sections -->
+    <!-- PASTEL SECTIONS -->
     <div class="pastel-block" style="background:#F8D7DA;">
         <div class="section-title">Client Information</div>
         <textarea id="clientInfo" placeholder="Enter client name, address, contact..."></textarea>
@@ -171,7 +174,7 @@ function setDocType(type) {
     alert(type + " mode activated.");
 }
 
-// AUTO TEXT COLOR BASED ON BACKGROUND
+// AUTO TEXT COLOR BASED ON BG
 function setContrastText() {
     const blocks = document.querySelectorAll('.pastel-block');
 
@@ -190,7 +193,6 @@ function setContrastText() {
     });
 }
 
-// GENERATE DOCUMENT
 function generateInvoice() {
     const today = new Date().toISOString().split('T')[0];
     const ref = "INV-2025-" + invoiceCounter++;
@@ -201,7 +203,7 @@ function generateInvoice() {
         <p><b>Document Ref:</b> ${ref}</p>
         <hr>
         <p><b>Client:</b><br>${document.getElementById("clientInfo").value.replace(/\n/g,"<br>")}</p>
-        <p><b>Description:</b><br>${document.getElementById("description").value.replace(/\n/g,"<br>")}</p>
+        <p><b>Description:</b><br>${document.getElementById("description").value.replace(/\n,g,"<br>")}</p>
         <p><b>Items:</b><br>${document.getElementById("items").value.replace(/\n/g,"<br>")}</p>
         <p><b>Amount:</b><br>${document.getElementById("amount").value.replace(/\n/g,"<br>")}</p>
         <p><b>Notes:</b><br>${document.getElementById("notes").value.replace(/\n/g,"<br>")}</p>
@@ -209,7 +211,6 @@ function generateInvoice() {
     `;
 }
 
-// Apply contrast on load
 window.onload = setContrastText;
 </script>
 
