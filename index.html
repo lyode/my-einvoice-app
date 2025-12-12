@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Refit Maintenance Services — e-Invoice App (Full)</title>
+<title>Refit Maintenance Services — e-Invoice App (Final)</title>
 <style>
   :root{
-    --bg:#f7f8fb; --card:#fff; --text:#111; --muted:#6b7280; --accent:#0b5f8a;
+    --bg:#f7f7fb; --card:#fff; --text:#111; --muted:#6b7280; --accent:#0b5f8a;
   }
   body.dark{--bg:#0f1113;--card:#141417;--text:#eef2f3;--muted:#9aa0a6}
   /* 12 pastel theme accents */
@@ -53,7 +53,7 @@
       <img id="logoImg" class="logo" src="CB93A44D-3626-47FE-9844-926D465D083E.jpeg" alt="logo" onerror="this.style.display='none'"/>
       <div>
         <h1>Refit Maintenance Services</h1>
-        <div class="muted small">SSM: <strong>201803348973</strong> • Sole proprietorship • OG: 10451781060</div>
+        <div class="muted small">SSM: <strong>201803348973</strong> • TIN: <strong>OG 10451781060</strong></div>
       </div>
     </div>
 
@@ -90,7 +90,7 @@
           </div>
           <div style="width:120px">
             <label>Call number</label>
-            <input id="callNo" placeholder="Call no">
+            <input id="callNo" placeholder="Call number">
           </div>
         </div>
 
@@ -111,7 +111,7 @@
 
         <hr>
 
-        <strong>Seller (pre-filled — required)</strong>
+        <strong>Seller (fixed template)</strong>
         <div class="row">
           <div style="flex:1">
             <label>Seller name</label>
@@ -129,7 +129,8 @@
         <label>Seller address</label>
         <textarea id="sellerAddress">C-08-34, Centum @ Oasis Corporate Park
 Oasis Damansara
-No. 2, Jalan PJU 1A/2, Ara Damansara
+No.2 Jalan PJU 1A/2
+Ara Damansara
 47301 Petaling Jaya
 Selangor Darul Ehsan
 Malaysia</textarea>
@@ -199,9 +200,9 @@ Malaysia</textarea>
         <label>API endpoint (optional)</label><input id="apiEndpoint" placeholder="https://your-api.example/submit">
         <div class="actions">
           <button class="btn btn-primary" onclick="preparePayload()">Prepare e-Invoice JSON</button>
-          <button class="btn btn-ghost" id="sendApiBtn" onclick="sendToApi()" disabled>Send to API</button>
+          <button class="btn btn-ghost" id="sendApiBtn" onclick="sendToApi()" disabled>Send to API (placeholder)</button>
         </div>
-        <div class="small-muted" style="margin-top:6px">Note: attach credentials & headers in your backend before sending to MyInvois.</div>
+        <div class="small-muted" style="margin-top:6px">Note: add backend credentials before posting to MyInvois.</div>
       </div>
 
       <!-- Actions -->
@@ -218,7 +219,7 @@ Malaysia</textarea>
           <button class="btn btn-primary no-print" onclick="markAsPaid()">Mark as Paid (Auto-Receipt)</button>
           <button class="btn btn-primary no-print" onclick="generateDocument('DO')">Create DO</button>
           <button class="btn btn-ghost no-print" onclick="generateDocument('QT')">Create Quotation</button>
-          <button class="btn btn-ghost no-print" onclick="generateDocument('CMP')">Completion Letter</button>
+          <button class="btn btn-ghost no-print" onclick="generateDocument('CL')">Completion Letter</button>
         </div>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -283,9 +284,9 @@ Malaysia</textarea>
 
 <script>
 /* ----------------------- Keys & helpers ----------------------- */
-const KEY_BUYERS = 'refit_buyers_v4';
-const KEY_INVOICES = 'refit_invoices_v4';
-const KEY_SEQ = 'refit_seq_v4';
+const KEY_BUYERS = 'refit_buyers_final';
+const KEY_INVOICES = 'refit_invoices_final';
+const KEY_SEQ = 'refit_seq_final';
 let currentPayload = null;
 let qr = null;
 const $ = id => document.getElementById(id);
@@ -426,7 +427,7 @@ async function sendToApi(){
   }catch(err){ alert('API error: '+err.message); }
 }
 
-/* ----------------------- document generators (Receipt / DO / QT / CMP) ----------------------- */
+/* ----------------------- document generators (Receipt / DO / QT / CL) ----------------------- */
 function markAsPaid(){
   // create receipt and open print
   if(!currentPayload) preparePayload();
@@ -437,20 +438,25 @@ function markAsPaid(){
     invoiceNumber: currentPayload.invoiceNumber,
     date: new Date().toISOString(),
     amount,
-    method: 'CASH / BANK TRANSFER',
+    method: 'BANK_TRANSFER / CASH',
     seller: currentPayload.seller,
     buyer: currentPayload.buyer
   };
-  // save receipt locally with invoices
+  // save receipt in invoices list
   const arr = JSON.parse(localStorage.getItem(KEY_INVOICES)||'[]');
   arr.unshift({ type:'RECEIPT', doc:r }); localStorage.setItem(KEY_INVOICES, JSON.stringify(arr));
-  // render receipt and print
+  // render receipt (reuse preview area with receipt content)
   renderReceipt(r);
-  setTimeout(()=> window.print(), 500);
+  // set invoice as paid marker (simple note)
+  currentPayload.paid = true;
+  // auto-save invoice with receipt link
+  saveInvoiceLocal();
+  // print receipt
+  setTimeout(()=> window.print(), 700);
 }
 function renderReceipt(r){
   const node = document.querySelector('#previewCard');
-  node.querySelector('#pvInvNo').textContent = r.invoiceNumber || '-';
+  node.querySelector('#pvInvNo').textContent = r.receiptNo || '-';
   node.querySelector('#pvDate').textContent = new Date(r.date).toLocaleDateString();
   node.querySelector('#pvBuyer').textContent = r.buyer?.name || $('buyerName').value || '';
   node.querySelector('#pvBuyerAddr').textContent = r.buyer?.address || $('buyerAddress').value || '';
@@ -461,10 +467,11 @@ function renderReceipt(r){
   node.querySelector('#pvUUID').textContent = $('uuid').value || '-';
   node.querySelector('#pvValTs').textContent = $('validationTs').value || '-';
 }
+
 function generateDocument(type){
-  // type: DO, QT, CMP
-  const noMap = { 'DO':'DO', 'QT':'QT', 'CMP':'CMP' };
-  const docNo = nextSeq(noMap[type]);
+  // DO, QT, CL
+  const map = {'DO':'DO','QT':'QT','CL':'CL'};
+  const docNo = nextSeq(map[type]);
   const node = document.querySelector('#previewCard');
   node.querySelector('#pvInvNo').textContent = docNo;
   node.querySelector('#pvDate').textContent = new Date().toLocaleDateString();
@@ -473,8 +480,8 @@ function generateDocument(type){
   node.querySelector('#pvSubtotal').textContent = fmt(0);
   node.querySelector('#pvTax').textContent = fmt(0);
   node.querySelector('#pvTotal').textContent = fmt(0);
-  node.querySelector('#pvNotes').textContent = (type==='DO'?'Delivery Order':'') + (type==='QT'?'Quotation':'') + (type==='CMP'?'Completion Letter':'');
-  // show print dialog
+  node.querySelector('#pvNotes').textContent = type==='DO' ? 'Delivery Order' : type==='QT' ? 'Quotation' : 'Completion Letter';
+  // print
   setTimeout(()=> window.print(), 600);
 }
 
@@ -482,8 +489,9 @@ function generateDocument(type){
 function generateQR(){
   const inv = $('invoiceNo').value || '';
   const sellerTin = $('sellerTIN').value || '';
+  const subtotal = (currentPayload && currentPayload.summary) ? currentPayload.summary.subtotal : 0;
   const total = (currentPayload && currentPayload.summary) ? currentPayload.summary.total : 0;
-  const txt = `INV|${inv}|SELLER:${sellerTin}|TOT:${total}`;
+  const txt = `INV|${inv}|SELLER:${sellerTin}|SUB:${subtotal}|TOT:${total}`;
   if(!qr) qr = new QRious({ element: $('qrArea'), size:120, value: txt }); else qr.set({ value: txt });
 }
 function generateVerifiedQR(){
