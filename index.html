@@ -1,523 +1,211 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Refit — e-Invoice / Invoice Generator</title>
+<meta charset="UTF-8">
+<title>Refit e-Invoice System</title>
 
-<!-- External libs (CDN) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 
 <style>
-  :root{--text:#000}
-  body{font-family:Arial,Helvetica,sans-serif;background:#f4f5f6;color:var(--text);margin:18px}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-  button{background:#fff;border:1px solid #000;padding:8px 12px;cursor:pointer;font-weight:700;color:#000;border-radius:6px}
-  .container{max-width:900px;margin:auto;background:#fff;padding:20px;border:1px solid #000}
-  .header{display:flex;justify-content:space-between;gap:12px;border-bottom:2px solid #000;padding-bottom:12px}
-  .left{width:48%}
-  .right{width:48%}
-  #logo{max-width:140px;max-height:80px;border:1px solid #ddd;padding:4px}
-  textarea, input[type="text"], input[type="number"], input[type="date"]{width:100%;box-sizing:border-box;padding:6px;border:1px solid #000;font-size:13px}
-  .company-fixed{font-size:13px;white-space:pre-line}
-  .doc-title{font-size:20px;text-align:right;margin:0}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{border:1px solid #000;padding:8px;font-size:13px;vertical-align:top}
-  th{text-align:center}
-  .right-align{text-align:right}
-  .totals{margin-top:10px;display:flex;justify-content:flex-end}
-  .totals table{width:360px}
-  .sign-row{display:flex;justify-content:space-between;margin-top:36px}
-  .sign-box{width:48%;border-top:1px dashed #000;padding-top:10px;text-align:center;font-size:13px;min-height:60px}
-  .small{font-size:12px;color:#333}
-  .muted{color:#666;font-size:12px}
-  #qr{width:90px;height:90px}
-  .file-input{font-size:12px;padding:6px}
-  .label-inline{display:inline-block;margin-right:8px;font-weight:700}
-  .meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .meta-row > *{flex:1;min-width:160px}
-  .top-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
-  .note-box{margin-top:10px;border:1px solid #000;padding:8px;font-size:13px;background:#fff}
-  .download-links{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
-  /* print friendly */
-  @media print{
-    body{background:white}
-    .toolbar, .top-controls, .download-links{display:none}
-    .container{border:none;box-shadow:none;margin:0}
-  }
+body { font-family: Arial; background:#f4f4f4; padding:20px; }
+.invoice { background:#fff; padding:25px; max-width:950px; margin:auto; border:1px solid #000; }
+h2 { text-align:right; margin:0; }
+input, textarea { width:100%; border:1px solid #000; padding:5px; font-size:13px; }
+textarea { resize:none; }
+.header { display:flex; justify-content:space-between; margin-bottom:15px; }
+.box { width:48%; font-size:13px; }
+label { font-weight:bold; font-size:12px; display:block; margin-top:4px; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+table, th, td { border:1px solid #000; }
+th, td { padding:6px; font-size:13px; }
+.right { text-align:right; }
+button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; margin:4px 2px; cursor:pointer; }
+.signature { margin-top:35px; display:flex; justify-content:space-between; }
+.sig-box { width:45%; border-top:1px dotted #000; padding-top:5px; text-align:center; font-size:13px; }
+#logo { max-height:70px; }
 </style>
 </head>
+
 <body>
 
-<div class="toolbar">
-  <button id="btnInvoice" onclick="setDocType('INVOICE')">Invoice</button>
-  <button id="btnQuote" onclick="setDocType('QUOTATION')">Quotation</button>
-  <button id="btnDO" onclick="setDocType('DO')">DO</button>
-  <button id="btnReceipt" onclick="setDocType('RECEIPT')">Receipt</button>
+<button onclick="setDoc('INVOICE')">Invoice</button>
+<button onclick="setDoc('QUOTATION')">Quotation</button>
+<button onclick="setDoc('DELIVERY ORDER')">DO</button>
+<button onclick="setDoc('RECEIPT')">Receipt</button>
+<button onclick="langBM()">BM</button>
+<button onclick="langEN()">EN</button>
+<button onclick="generatePDF()">Generate PDF</button>
 
-  <button onclick="switchLang('en')">English</button>
-  <button onclick="switchLang('ms')">Malay</button>
+<div class="invoice" id="invoice">
 
-  <button onclick="generateAndDownloadPDF()">Generate PDF</button>
-  <button onclick="exportJSON()">Export JSON (MyInvois)</button>
-  <button onclick="downloadJSON()">Download JSON file</button>
+<img id="logo">
+<input type="file" onchange="loadLogo(event)">
 
-  <label class="label-inline muted">Logo:</label>
-  <input class="file-input" id="logoInput" type="file" accept="image/*" onchange="loadLogo(event)">
+<h2 id="docTitle">INVOICE</h2>
 
-  <label class="label-inline muted">Signature (Manager):</label>
-  <input class="file-input" id="sigInput" type="file" accept="image/*" onchange="loadSignature(event)">
+<!-- HEADER -->
+<div class="header">
+<div class="box">
+<label>Seller Name</label>
+<input value="Refit Maintenance Services">
 
+<label>Business Type</label>
+<input value="Sole Proprietorship">
+
+<label>Reg No</label>
+<input value="201803348973">
+
+<label>TIN</label>
+<input value="OG 10451781060">
+
+<label>Address</label>
+<textarea rows="3">C-08-34, Centum @ Oasis Corporate Park, Oasis Damansara, No.2 Jalan PJU 1A/2, Ara Damansara, 47301 Petaling Jaya, Selangor Darul Ehsan, West Malaysia.</textarea>
+
+<label>Bank</label>
+<input value="RHB Bank">
+
+<label>Account No</label>
+<input value="2126 1100 0235 58">
 </div>
 
-<div class="container" id="invoiceRoot">
-  <div class="header">
-    <div class="left">
-      <img id="logo" src="" alt="logo" />
-      <div style="height:6px"></div>
-      <div class="company-fixed" contenteditable="true" id="companyBlock">
-Refit Maintenance Services
-Sole Proprietorship
-Reg No: 201803348973 / TIN No: OG 10451781060
-C-08-34, Centum @ Oasis Corporate Park,
-Oasis Damansara, No.2 Jalan PJU 1A/2,
-Ara Damansara, 47301 Petaling Jaya,
-Selangor Darul Ehsan, West Malaysia
-Bank: RHB Bank
-Acc No: 2126 1100 0235 58
-      </div>
-    </div>
+<div class="box">
+<label>Buyer Name</label>
+<input>
 
-    <div class="right">
-      <div class="doc-title" id="docTitle">INVOICE</div>
-      <div class="meta-row">
-        <input type="text" id="invoiceNumber" placeholder="Invoice No." value="">
-        <input type="date" id="invoiceDate" value="">
-        <input type="text" id="currency" value="MYR">
-      </div>
+<label>Buyer TIN</label>
+<input>
 
-      <div class="meta-row" style="margin-top:6px">
-        <input type="text" id="paymentTerms" placeholder="Payment terms (e.g., Due in 14 days)" value="Due in 14 days">
-        <input type="text" id="sellerTIN" placeholder="Seller TIN" value="OG 10451781060">
-      </div>
+<label>Buyer Reg No</label>
+<input>
 
-      <div style="margin-top:8px">
-        <div class="small">Buyer (editable, safe text):</div>
-        <textarea id="buyerBlock" rows="5" placeholder="Buyer name / address / contact"></textarea>
-      </div>
-    </div>
-  </div>
+<label>Buyer Address</label>
+<textarea rows="3"></textarea>
 
-  <!-- items table (single row simple) -->
-  <table id="itemsTable" aria-label="Invoice Items">
-    <thead>
-      <tr>
-        <th id="thDesc">PERKARA / DESCRIPTION</th>
-        <th id="thUnit">HARGA SEUNIT / UNIT PRICE (RM)</th>
-        <th id="thQty">BIL / QTY</th>
-        <th id="thAmount">HARGA / AMOUNT (RM)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><div contenteditable="true" id="itemDesc">Service / Work description</div></td>
-        <td><div contenteditable="true" id="itemUnit">0.00</div></td>
-        <td><div contenteditable="true" id="itemQty">1</div></td>
-        <td><div id="itemTotal" class="right-align">0.00</div></td>
-      </tr>
-    </tbody>
-  </table>
+<label>Contact</label>
+<input>
 
-  <!-- notes / payment instruction -->
-  <div class="note-box" contenteditable="true" id="paymentInstr">
-    Payment instruction: Bank transfer to RHB Bank Acc No: 21261100023558. Please include invoice ref when paying.
-  </div>
-
-  <!-- totals -->
-  <div class="totals">
-    <table>
-      <tbody>
-        <tr>
-          <td style="border:none"> </td>
-          <td id="lblSubtotal" class="right-align small">Subtotal</td>
-          <td id="valSubtotal" class="right-align">RM 0.00</td>
-        </tr>
-        <tr>
-          <td style="border:none"> </td>
-          <td id="lblTax" class="right-align small">Tax (SST) — if applicable</td>
-          <td id="valTax" class="right-align">RM 0.00</td>
-        </tr>
-        <tr class="total-row">
-          <td style="border:none"> </td>
-          <td id="lblTotal" class="right-align" style="font-weight:800">TOTAL</td>
-          <td id="valTotal" class="right-align" style="font-weight:800">RM 0.00</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- amount in words & uuid & qr -->
-  <div style="display:flex;justify-content:space-between;gap:12px;margin-top:10px;align-items:flex-start">
-    <div style="flex:1">
-      <div class="small" id="labelWords">Amount in words:</div>
-      <div id="amountWords" style="font-style:italic;margin-top:6px">Ringgit Malaysia ...</div>
-    </div>
-
-    <div style="width:140px;text-align:right">
-      <div id="qr"></div>
-      <div class="muted" style="font-size:12px;margin-top:6px">UUID:</div>
-      <div id="uuidBox" class="muted" style="word-break:break-all"></div>
-    </div>
-  </div>
-
-  <!-- signatures -->
-  <div class="sign-row">
-    <div class="sign-box" id="buyerSign">
-      <div class="muted">Receiver / Buyer</div>
-      <div style="margin-top:6px" id="buyerSigImgArea"></div>
-    </div>
-
-    <div class="sign-box" id="managerSign">
-      <div class="muted">Manager</div>
-      <div style="margin-top:6px" id="managerSigImgArea"></div>
-    </div>
-  </div>
-
-  <div style="margin-top:10px" class="muted small">Generated by Refit e-Invoice generator</div>
+<label>Email</label>
+<input>
+</div>
 </div>
 
-<div class="download-links">
-  <button onclick="regenUUID()">Regenerate UUID</button>
-  <button onclick="updateTotals()">Recalculate</button>
-  <button onclick="insertSample()">Fill Sample</button>
-  <button onclick="clearBuyer()">Clear Buyer</button>
+<!-- INVOICE META -->
+<table>
+<tr>
+<td>Invoice No</td>
+<td><input value="INV-2025-001"></td>
+<td>Date</td>
+<td><input type="date" value=""></td>
+</tr>
+<tr>
+<td>UUID</td>
+<td colspan="3"><input id="uuid"></td>
+</tr>
+</table>
+
+<!-- ITEMS -->
+<table id="itemTable">
+<tr>
+<th>Description</th>
+<th>Qty</th>
+<th>Unit Price</th>
+<th>Amount</th>
+<th>❌</th>
+</tr>
+</table>
+
+<button onclick="addRow()">Add Item</button>
+
+<!-- TOTAL -->
+<table>
+<tr>
+<td colspan="3" class="right"><b>Total</b></td>
+<td id="grandTotal">0.00</td>
+<td></td>
+</tr>
+</table>
+
+<!-- AMOUNT WORDS -->
+<label>Amount in Words</label>
+<input id="words">
+
+<!-- QR -->
+<div id="qrcode" style="margin-top:15px;"></div>
+
+<!-- SIGNATURE -->
+<div class="signature">
+<div class="sig-box">
+Buyer Signature<br>
+<input type="file">
+</div>
+<div class="sig-box">
+Manager Signature<br>
+<input type="file">
+</div>
+</div>
+
 </div>
 
 <script>
-  // ---------- Initialization ----------
-  const invoiceNumberEl = document.getElementById('invoiceNumber');
-  const dateEl = document.getElementById('invoiceDate');
-  const today = new Date().toISOString().slice(0,10);
-  dateEl.value = today;
-  // default invoice number start (INV-2025-221)
-  if(!invoiceNumberEl.value) invoiceNumberEl.value = 'INV-2025-221';
+document.querySelector('input[type=date]').value = new Date().toISOString().slice(0,10);
+document.getElementById("uuid").value = crypto.randomUUID();
 
-  // generate initial UUID & QR
-  let currentUUID = generateUUID();
-  document.getElementById('uuidBox').innerText = currentUUID;
-  makeQR();
+function addRow(){
+let t=document.getElementById("itemTable");
+let r=t.insertRow();
+r.innerHTML=`<td contenteditable></td>
+<td contenteditable oninput="calc()"></td>
+<td contenteditable oninput="calc()"></td>
+<td class="right">0.00</td>
+<td><button onclick="this.parentElement.parentElement.remove();calc()">X</button></td>`;
+}
+addRow();
 
-  // event listeners to auto-calc on content changes
-  ['itemUnit','itemQty'].forEach(id => {
-    document.getElementById(id).addEventListener('input', updateTotals);
-    // support paste numeric
-    document.getElementById(id).addEventListener('blur', updateTotals);
-  });
+function calc(){
+let total=0;
+document.querySelectorAll("#itemTable tr").forEach((r,i)=>{
+if(i>0){
+let q=parseFloat(r.cells[1].innerText)||0;
+let p=parseFloat(r.cells[2].innerText)||0;
+let a=q*p;
+r.cells[3].innerText=a.toFixed(2);
+total+=a;
+}
+});
+document.getElementById("grandTotal").innerText=total.toFixed(2);
+document.getElementById("words").value=total.toFixed(2)+" RINGGIT MALAYSIA";
+generateQR();
+}
 
-  // update initial totals
-  updateTotals();
+function generateQR(){
+document.getElementById("qrcode").innerHTML="";
+new QRCode(document.getElementById("qrcode"), {
+text: document.getElementById("uuid").value,
+width:90,height:90
+});
+}
 
-  // ---------- Functions ----------
+function generatePDF(){
+html2pdf().from(document.getElementById("invoice")).save();
+}
 
-  function setDocType(t){
-    document.getElementById('docTitle').innerText = t;
-    // small label adjustments (no SST if not registered)
-    if(t === 'QUOTATION') {
-      document.getElementById('paymentInstr').innerText = 'Quotation. Prices subject to change.';
-    } else if(t === 'DO') {
-      document.getElementById('paymentInstr').innerText = 'Delivery Order - goods dispatched.';
-    } else if(t === 'RECEIPT') {
-      document.getElementById('paymentInstr').innerText = 'Receipt - payment received.';
-    } else {
-      document.getElementById('paymentInstr').innerText = 'Payment instruction: Bank transfer to RHB Bank Acc No: 21261100023558. Please include invoice ref when paying.';
-    }
-  }
+function setDoc(t){ document.getElementById("docTitle").innerText=t; }
 
-  // generate simple UUID (v4-like)
-  function generateUUID(){
-    // local placeholder - not an authorized LHDN UUID but suitable as internal placeholder
-    return 'urn:uuid:' + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
-      const r = Math.random()*16|0, v = c==='x'? r :(r&0x3|0x8);
-      return v.toString(16);
-    });
-  }
+function loadLogo(e){
+let r=new FileReader();
+r.onload=()=>document.getElementById("logo").src=r.result;
+r.readAsDataURL(e.target.files[0]);
+}
 
-  function regenUUID(){
-    currentUUID = generateUUID();
-    document.getElementById('uuidBox').innerText = currentUUID;
-    makeQR();
-    alert('New local UUID generated and set on invoice.');
-  }
+function langBM(){
+document.getElementById("docTitle").innerText="INVOIS";
+}
 
-  function sanitizeText(s){
-    // remove script tags and trim
-    return String(s||'').replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi,'').trim();
-  }
-
-  function updateTotals(){
-    const unit = parseFloat(document.getElementById('itemUnit').innerText.replace(/[^\d.-]/g,'')) || 0;
-    const qty = parseFloat(document.getElementById('itemQty').innerText.replace(/[^\d.-]/g,'')) || 0;
-    const amt = +(unit * qty).toFixed(2);
-    document.getElementById('itemTotal').innerText = amt.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
-
-    const subtotal = amt;
-    const tax = 0.00; // user selected Not SST-registered (per your choice). modify if SST applies.
-    const total = +(subtotal + tax).toFixed(2);
-
-    document.getElementById('valSubtotal').innerText = 'RM ' + subtotal.toLocaleString('en-MY',{minimumFractionDigits:2});
-    document.getElementById('valTax').innerText = 'RM ' + tax.toLocaleString('en-MY',{minimumFractionDigits:2});
-    document.getElementById('valTotal').innerText = 'RM ' + total.toLocaleString('en-MY',{minimumFractionDigits:2});
-
-    // amount words (English & Malay)
-    document.getElementById('amountWords').innerText = numberToWordsMY(total);
-    // update QR payload
-    makeQR();
-  }
-
-  // number to words (Malay friendly short form). For robust production use server-side library.
-  function numberToWordsMY(amount){
-    // We'll provide both English and Malay style in one line for simplicity
-    const intPart = Math.floor(amount);
-    const cents = Math.round((amount - intPart) * 100);
-    return toEnglishWords(intPart) + ' Ringgit' + (cents ? ' and ' + cents + ' sen' : ' only') + '  /  ' + toMalayWords(intPart) + ' Ringgit' + (cents ? ' dan ' + cents + ' sen' : ' sahaja');
-  }
-
-  // simple english conversion (supports up to millions)
-  function toEnglishWords(n){
-    if(n===0) return 'Zero';
-    const a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
-    const b = ['','', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-    function inner(num){
-      if(num<20) return a[num];
-      if(num<100) return b[Math.floor(num/10)] + (num%10? ' ' + a[num%10] : '');
-      if(num<1000) return a[Math.floor(num/100)] + ' Hundred' + (num%100 ? ' ' + inner(num%100) : '');
-      if(num<1000000) return inner(Math.floor(num/1000)) + ' Thousand' + (num%1000 ? ' ' + inner(num%1000) : '');
-      return inner(Math.floor(num/1000000)) + ' Million' + (num%1000000 ? ' ' + inner(num%1000000) : '');
-    }
-    return inner(n);
-  }
-
-  // very simplified Malay words (for common cases). For full coverage, use a library.
-  function toMalayWords(n){
-    if(n===0) return 'Kosong';
-    const units = ['','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Lapan','Sembilan','Sepuluh','Sebelas'];
-    function inner(num){
-      if(num<12) return units[num];
-      if(num<20) return inner(num-10) + ' Belas';
-      if(num<100) return inner(Math.floor(num/10)) + ' Puluh' + (num%10 ? ' ' + inner(num%10) : '');
-      if(num<200) return 'Seratus' + (num%100 ? ' ' + inner(num%100) : '');
-      if(num<1000) return inner(Math.floor(num/100)) + ' Ratus' + (num%100 ? ' ' + inner(num%100) : '');
-      if(num<2000) return 'Seribu' + (num%1000 ? ' ' + inner(num%1000) : '');
-      if(num<1000000) return inner(Math.floor(num/1000)) + ' Ribu' + (num%1000 ? ' ' + inner(num%1000) : '');
-      return inner(Math.floor(num/1000000)) + ' Juta' + (num%1000000 ? ' ' + inner(num%1000000) : '');
-    }
-    return inner(n);
-  }
-
-  // QR generation
-  function makeQR(){
-    const sellerTIN = sanitizeText(document.getElementById('sellerTIN').value || document.getElementById('sellerTIN').placeholder);
-    const invNo = sanitizeText(document.getElementById('invoiceNumber').value || '');
-    const totalText = document.getElementById('valTotal').innerText.replace(/[^0-9.]/g,'') || '0.00';
-    const qrData = `${invNo}|${sellerTIN}|${totalText}`;
-    // create QR
-    const qrDiv = document.getElementById('qr');
-    qrDiv.innerHTML = '';
-    new QRCode(qrDiv, {
-      text: qrData,
-      width: 90,
-      height: 90
-    });
-  }
-
-  // Load logo from file input
-  function loadLogo(evt){
-    const f = evt.target.files[0];
-    if(!f) return;
-    const reader = new FileReader();
-    reader.onload = (e)=> document.getElementById('logo').src = e.target.result;
-    reader.readAsDataURL(f);
-  }
-
-  // load signature into managerSig area
-  function loadSignature(evt){
-    const f = evt.target.files[0];
-    if(!f) return;
-    const reader = new FileReader();
-    reader.onload = (e)=>{
-      const img = document.createElement('img');
-      img.src = e.target.result;
-      img.style.maxWidth='180px';
-      img.style.maxHeight='80px';
-      const area = document.getElementById('managerSigImgArea');
-      area.innerHTML = '';
-      area.appendChild(img);
-    };
-    reader.readAsDataURL(f);
-  }
-
-  // digital signature insertion for buyer optional (user signs and upload)
-  function insertBuyerSignature(dataURL){
-    const img = document.createElement('img');
-    img.src = dataURL;
-    img.style.maxWidth='180px';
-    img.style.maxHeight='80px';
-    const area = document.getElementById('buyerSigImgArea');
-    area.innerHTML = '';
-    area.appendChild(img);
-  }
-
-  // sample filler
-  function insertSample(){
-    document.getElementById('buyerBlock').value = "ABC Sdn Bhd\nNo. 5, Jalan Contoh\nKuala Lumpur\nTel: +60 12-3456789\nTIN: 1234567890";
-    document.getElementById('itemDesc').innerText = 'Project: Renovation - kitchen tiles';
-    document.getElementById('itemUnit').innerText = '1200.00';
-    document.getElementById('itemQty').innerText = '1';
-    updateTotals();
-  }
-
-  function clearBuyer(){
-    document.getElementById('buyerBlock').value = '';
-  }
-
-  // Export JSON (MyInvois-style)
-  let lastExportJSON = null;
-  function exportJSON(){
-    updateTotals();
-    const payload = buildJSONPayload();
-    lastExportJSON = payload;
-    // show quick preview / copy
-    const pretty = JSON.stringify(payload,null,2);
-    const w = window.open('', '_blank');
-    w.document.write('<pre>'+escapeHtml(pretty)+'</pre>');
-    w.document.title = 'e-Invoice JSON';
-  }
-
-  function downloadJSON(){
-    if(!lastExportJSON) lastExportJSON = buildJSONPayload();
-    const blob = new Blob([JSON.stringify(lastExportJSON,null,2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (document.getElementById('invoiceNumber').value || 'invoice') + '.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-
-  function buildJSONPayload(){
-    const invNo = sanitizeText(document.getElementById('invoiceNumber').value);
-    const invDate = sanitizeText(document.getElementById('invoiceDate').value);
-    const currency = sanitizeText(document.getElementById('currency').value || 'MYR');
-    const seller = {
-      name: sanitizeText(document.getElementById('companyBlock').innerText),
-      ssm: sanitizeText('201803348973'),
-      tin: sanitizeText(document.getElementById('sellerTIN').value || 'OG 10451781060'),
-      address: sanitizeText(document.getElementById('companyBlock').innerText),
-      bank: sanitizeText(document.getElementById('companyBlock').innerText)
-    };
-    const buyerName = sanitizeText(document.getElementById('buyerBlock').value || '');
-    const line = {
-      lineNo: 1,
-      description: sanitizeText(document.getElementById('itemDesc').innerText),
-      uom: 'EA',
-      quantity: parseFloat(document.getElementById('itemQty').innerText)||0,
-      unitPrice: parseFloat((document.getElementById('itemUnit').innerText).replace(/[^\d.-]/g,''))||0,
-      lineTotal: parseFloat((document.getElementById('itemTotal').innerText).replace(/[^\d,]/g,''))||0,
-      lineTaxPercent: 0.0,
-      currency: currency
-    };
-    const subtotal = parseFloat(line.lineTotal.toFixed(2));
-    const tax = 0.0;
-    const total = +(subtotal + tax).toFixed(2);
-
-    const payload = {
-      documentType: document.getElementById('docTitle').innerText || 'INVOICE',
-      invoiceNumber: invNo,
-      invoiceDate: invDate,
-      currency: currency,
-      seller: seller,
-      buyer: {
-        name: buyerName,
-        tin: '', address: sanitizeText(document.getElementById('buyerBlock').value || '')
-      },
-      lines: [line],
-      summary: { subtotal: subtotal, tax: tax, total: total },
-      payment: { method: 'BANK_TRANSFER', bank: 'RHB Bank', account: '21261100023558' },
-      uuid: currentUUID,
-      validationTimestamp: '',
-      notes: sanitizeText(document.getElementById('paymentInstr').innerText || '')
-    };
-    return payload;
-  }
-
-  // escape HTML for preview
-  function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  // Generate PDF using html2pdf
-  async function generateAndDownloadPDF(){
-    updateTotals();
-    // ensure uuid present
-    if(!currentUUID) regenUUID();
-    // Put UUID into invoice area
-    document.getElementById('uuidBox').innerText = currentUUID;
-    makeQR();
-
-    const element = document.getElementById('invoiceRoot');
-    // clone to modify layout for A4 print
-    const opt = {
-      margin:       [10,10,10,10], // mm
-      filename:     (document.getElementById('invoiceNumber').value || 'invoice') + '.pdf',
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS:true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    // add a small footer noting e-invoice uuid
-    const footer = document.createElement('div');
-    footer.style.fontSize = '10px';
-    footer.style.marginTop = '8px';
-    footer.innerText = 'UUID: ' + currentUUID;
-    element.appendChild(footer);
-
-    await html2pdf().set(opt).from(element).save();
-
-    // remove footer after generating
-    element.removeChild(footer);
-  }
-
-  // Language switch (English / Malay)
-  function switchLang(lang){
-    if(lang==='ms'){
-      document.getElementById('thDesc').innerText = 'PERKARA';
-      document.getElementById('thUnit').innerText = 'HARGA SEUNIT';
-      document.getElementById('thQty').innerText = 'BIL';
-      document.getElementById('thAmount').innerText = 'HARGA';
-      document.getElementById('lblSubtotal').innerText = 'Jumlah Sebah (Subtotal)';
-      document.getElementById('lblTax').innerText = 'Cukai (jika berkaitan)';
-      document.getElementById('lblTotal').innerText = 'JUMLAH';
-      document.getElementById('labelWords').innerText = 'Nilai dalam perkataan:';
-      document.getElementById('docTitle').innerText = document.getElementById('docTitle').innerText==='INVOICE' ? 'INVOIS' : document.getElementById('docTitle').innerText;
-    } else {
-      document.getElementById('thDesc').innerText = 'DESCRIPTION';
-      document.getElementById('thUnit').innerText = 'UNIT PRICE';
-      document.getElementById('thQty').innerText = 'QTY';
-      document.getElementById('thAmount').innerText = 'AMOUNT';
-      document.getElementById('lblSubtotal').innerText = 'Subtotal';
-      document.getElementById('lblTax').innerText = 'Tax (if applicable)';
-      document.getElementById('lblTotal').innerText = 'TOTAL';
-      document.getElementById('labelWords').innerText = 'Amount in words:';
-      document.getElementById('docTitle').innerText = document.getElementById('docTitle').innerText==='INVOIS' ? 'INVOICE' : document.getElementById('docTitle').innerText;
-    }
-  }
-
-  // small helpers to load a logo by URL (optional)
-  function setLogoFromURL(url){
-    document.getElementById('logo').src = url;
-  }
-
-  // on load sample logo placeholder (optional)
-  // setLogoFromURL('https://via.placeholder.com/140x80.png?text=Refit');
-
+function langEN(){
+document.getElementById("docTitle").innerText="INVOICE";
+}
 </script>
+
 </body>
 </html>
