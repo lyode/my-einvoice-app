@@ -8,56 +8,51 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 
 <style>
-body { font-family: Arial; background:#f4f4f4; padding:20px; }
-.invoice { background:#fff; padding:25px; max-width:950px; margin:auto; border:1px solid #000; }
-h2 { text-align:right; margin:0; }
-input, textarea { width:100%; border:1px solid #000; padding:5px; font-size:13px; }
-textarea { resize:none; }
-.header { display:flex; justify-content:space-between; margin-bottom:15px; }
-.box { width:48%; font-size:13px; }
-label { font-weight:bold; font-size:12px; display:block; margin-top:4px; }
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-table, th, td { border:1px solid #000; }
-th, td { padding:6px; font-size:13px; }
-.right { text-align:right; }
-button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; margin:4px 2px; cursor:pointer; }
-.signature { margin-top:35px; display:flex; justify-content:space-between; }
-.sig-box { width:45%; border-top:1px dotted #000; padding-top:5px; text-align:center; font-size:13px; }
-#logo { max-height:70px; }
+body{font-family:Arial;background:#f4f4f4;padding:20px}
+.invoice{background:#fff;padding:25px;max-width:950px;margin:auto;border:1px solid #000}
+h2{text-align:right;margin:0}
+input,textarea,select{width:100%;border:1px solid #000;padding:5px;font-size:13px}
+textarea{resize:none}
+.header{display:flex;justify-content:space-between;margin-bottom:15px}
+.box{width:48%}
+label{font-weight:bold;font-size:12px;margin-top:4px;display:block}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+table,th,td{border:1px solid #000}
+th,td{padding:6px;font-size:13px}
+.right{text-align:right}
+button{border:1px solid #000;background:#eee;color:#000;padding:6px 10px;margin:4px;cursor:pointer}
+.signature{margin-top:35px;display:flex;justify-content:space-between}
+.sig-box{width:45%;border-top:1px dotted #000;text-align:center;padding-top:5px}
+#logo{max-height:70px}
 
-@media print {
-  .no-print { display:none !important; }
-}
+@media print{.no-print{display:none}}
 </style>
 </head>
 
 <body>
 
-<!-- CONTROL PANEL -->
 <div class="no-print">
 <button onclick="setDoc('INVOICE')">Invoice</button>
 <button onclick="setDoc('QUOTATION')">Quotation</button>
 <button onclick="setDoc('DELIVERY ORDER')">DO</button>
 <button onclick="setDoc('RECEIPT')">Receipt</button>
-<button onclick="window.print()">Print / Preview</button>
-<button onclick="generatePDF()">Generate PDF</button>
-<br><br>
+<button onclick="window.print()">Print</button>
+<button onclick="generatePDF()">Generate PDF</button><br><br>
+
 <label>Upload Logo</label>
 <input type="file" onchange="loadLogo(event)">
-<br><br>
-<label>Upload Buyer Signature</label>
+
+<label>Buyer Signature</label>
 <input type="file" onchange="loadBuyerSign(event)">
-<label>Upload Seller Signature</label>
+<label>Seller Signature</label>
 <input type="file" onchange="loadSellerSign(event)">
 </div>
 
 <div class="invoice" id="invoice">
 
 <img id="logo">
-
 <h2 id="docTitle">INVOICE</h2>
 
-<!-- HEADER -->
 <div class="header">
 <div class="box">
 <label>Seller Name</label>
@@ -86,30 +81,34 @@ button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; m
 </div>
 
 <div class="box">
+<label>Select Buyer</label>
+<select id="buyerSelect" onchange="loadBuyer()"></select>
+
 <label>Buyer Name</label>
-<input>
+<input id="bName" oninput="saveBuyer()">
 
 <label>Business Category</label>
-<input>
+<input id="bCat" oninput="saveBuyer()">
 
 <label>Buyer TIN</label>
-<input>
+<input id="bTIN" oninput="saveBuyer()">
 
 <label>Buyer Reg No</label>
-<input>
+<input id="bReg" oninput="saveBuyer()">
 
 <label>Buyer Address</label>
-<textarea rows="3"></textarea>
+<textarea id="bAddr" rows="3" oninput="saveBuyer()"></textarea>
 
 <label>Contact</label>
-<input>
+<input id="bContact" oninput="saveBuyer()">
 
 <label>Email</label>
-<input>
+<input id="bEmail" oninput="saveBuyer()">
+
+<button class="no-print" onclick="deleteBuyer()">Delete Buyer</button>
 </div>
 </div>
 
-<!-- META -->
 <table>
 <tr>
 <td>Document No</td>
@@ -123,7 +122,6 @@ button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; m
 </tr>
 </table>
 
-<!-- ITEMS -->
 <table id="itemTable">
 <tr>
 <th>Description</th>
@@ -136,7 +134,6 @@ button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; m
 
 <button class="no-print" onclick="addRow()">Add Item</button>
 
-<!-- TOTAL -->
 <table>
 <tr>
 <td colspan="3" class="right"><b>Total</b></td>
@@ -148,108 +145,103 @@ button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; m
 <label>Amount in Words</label>
 <input id="words">
 
-<div id="qrcode" style="margin-top:15px;"></div>
+<div id="qrcode" style="margin-top:15px"></div>
 
-<!-- SIGNATURE -->
 <div class="signature">
-<div class="sig-box">
-<img id="buyerSign" style="max-height:60px"><br>
-Buyer Signature
-</div>
-
-<div class="sig-box">
-<img id="sellerSign" style="max-height:60px"><br>
-<b>Refit Maintenance Services</b>
-</div>
+<div class="sig-box"><img id="buyerSign" style="max-height:60px"><br>Buyer Signature</div>
+<div class="sig-box"><img id="sellerSign" style="max-height:60px"><br><b>Refit Maintenance Services</b></div>
 </div>
 
 </div>
 
 <script>
-document.querySelector('input[type=date]').value = new Date().toISOString().slice(0,10);
-document.getElementById("uuid").value = crypto.randomUUID();
+document.querySelector('input[type=date]').value=new Date().toISOString().slice(0,10)
+document.getElementById("uuid").value=crypto.randomUUID()
 
-/* AUTO RUNNING NUMBER */
-function getYear(){ return new Date().getFullYear(); }
-
-function generateDocNo(prefix){
-  const year = getYear();
-  const key = prefix + "-" + year;
-  let run = localStorage.getItem(key);
-  run = run ? parseInt(run) + 1 : 1;
-  localStorage.setItem(key, run);
-  return `${prefix}-${year}-${String(run).padStart(3,'0')}`;
+function generateDocNo(p){
+let y=new Date().getFullYear()
+let k=p+"-"+y
+let r=parseInt(localStorage.getItem(k)||0)+1
+localStorage.setItem(k,r)
+return `${p}-${y}-${String(r).padStart(3,'0')}`
 }
 
-function setDoc(type){
-  const map = {
-    "INVOICE":"INV",
-    "QUOTATION":"QTN",
-    "DELIVERY ORDER":"DO",
-    "RECEIPT":"RCP"
-  };
-  document.getElementById("docTitle").innerText = type;
-  document.getElementById("docNo").value = generateDocNo(map[type]);
+function setDoc(t){
+let m={INVOICE:"INV",QUOTATION:"QTN","DELIVERY ORDER":"DO",RECEIPT:"RCP"}
+docTitle.innerText=t
+docNo.value=generateDocNo(m[t])
 }
 
-/* ITEMS */
 function addRow(){
-let t=document.getElementById("itemTable");
-let r=t.insertRow();
+let r=itemTable.insertRow()
 r.innerHTML=`<td contenteditable></td>
 <td contenteditable oninput="calc()"></td>
 <td contenteditable oninput="calc()"></td>
 <td class="right">0.00</td>
-<td class="no-print"><button onclick="this.parentElement.parentElement.remove();calc()">X</button></td>`;
+<td class="no-print"><button onclick="this.closest('tr').remove();calc()">X</button></td>`
 }
-addRow();
+addRow()
 
 function calc(){
-let total=0;
+let t=0
 document.querySelectorAll("#itemTable tr").forEach((r,i)=>{
 if(i>0){
-let q=parseFloat(r.cells[1].innerText)||0;
-let p=parseFloat(r.cells[2].innerText)||0;
-let a=q*p;
-r.cells[3].innerText=a.toFixed(2);
-total+=a;
-}
-});
-document.getElementById("grandTotal").innerText=total.toFixed(2);
-document.getElementById("words").value=total.toFixed(2)+" RINGGIT MALAYSIA";
-generateQR();
-}
-
-function generateQR(){
-document.getElementById("qrcode").innerHTML="";
-new QRCode(document.getElementById("qrcode"), {
-text: document.getElementById("uuid").value,
-width:90,height:90
-});
+let q=parseFloat(r.cells[1].innerText)||0
+let p=parseFloat(r.cells[2].innerText)||0
+let a=q*p
+r.cells[3].innerText=a.toFixed(2)
+t+=a
+}})
+grandTotal.innerText=t.toFixed(2)
+words.value=t.toFixed(2)+" RINGGIT MALAYSIA"
+qrcode.innerHTML=""
+new QRCode(qrcode,{text:uuid.value,width:90,height:90})
 }
 
-function generatePDF(){
-html2pdf().from(document.getElementById("invoice")).save();
+function saveBuyer(){
+let n=bName.value
+if(!n)return
+let d={name:n,cat:bCat.value,tin:bTIN.value,reg:bReg.value,addr:bAddr.value,contact:bContact.value,email:bEmail.value}
+localStorage.setItem("buyer_"+n,JSON.stringify(d))
+loadBuyerList()
 }
 
-function loadLogo(e){
-let r=new FileReader();
-r.onload=()=>document.getElementById("logo").src=r.result;
-r.readAsDataURL(e.target.files[0]);
-}
-function loadBuyerSign(e){
-let r=new FileReader();
-r.onload=()=>document.getElementById("buyerSign").src=r.result;
-r.readAsDataURL(e.target.files[0]);
-}
-function loadSellerSign(e){
-let r=new FileReader();
-r.onload=()=>document.getElementById("sellerSign").src=r.result;
-r.readAsDataURL(e.target.files[0]);
+function loadBuyerList(){
+buyerSelect.innerHTML="<option value=''>-- Select Buyer --</option>"
+Object.keys(localStorage).filter(k=>k.startsWith("buyer_")).forEach(k=>{
+let o=document.createElement("option")
+o.value=k
+o.text=k.replace("buyer_","")
+buyerSelect.appendChild(o)
+})
 }
 
-/* DEFAULT LOAD */
-window.onload = ()=>setDoc("INVOICE");
+function loadBuyer(){
+let k=buyerSelect.value
+if(!k)return
+let d=JSON.parse(localStorage.getItem(k))
+bName.value=d.name
+bCat.value=d.cat
+bTIN.value=d.tin
+bReg.value=d.reg
+bAddr.value=d.addr
+bContact.value=d.contact
+bEmail.value=d.email
+}
+
+function deleteBuyer(){
+let k=buyerSelect.value
+if(!k)return
+localStorage.removeItem(k)
+loadBuyerList()
+}
+
+function generatePDF(){html2pdf().from(invoice).save()}
+function loadLogo(e){let r=new FileReader();r.onload=()=>logo.src=r.result;r.readAsDataURL(e.target.files[0])}
+function loadBuyerSign(e){let r=new FileReader();r.onload=()=>buyerSign.src=r.result;r.readAsDataURL(e.target.files[0])}
+function loadSellerSign(e){let r=new FileReader();r.onload=()=>sellerSign.src=r.result;r.readAsDataURL(e.target.files[0])}
+
+window.onload=()=>{setDoc("INVOICE");loadBuyerList()}
 </script>
 
 </body>
