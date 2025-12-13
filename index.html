@@ -33,7 +33,7 @@ button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; m
 
 <body>
 
-<!-- CONTROL PANEL (NOT PRINTED) -->
+<!-- CONTROL PANEL -->
 <div class="no-print">
 <button onclick="setDoc('INVOICE')">Invoice</button>
 <button onclick="setDoc('QUOTATION')">Quotation</button>
@@ -112,14 +112,14 @@ button { border:1px solid #000; background:#eee; color:#000; padding:6px 10px; m
 <!-- META -->
 <table>
 <tr>
-<td>Invoice No</td>
-<td><input value="INV-2025-001"></td>
+<td>Document No</td>
+<td><input id="docNo" readonly></td>
 <td>Date</td>
 <td><input type="date"></td>
 </tr>
 <tr>
 <td>UUID</td>
-<td colspan="3"><input id="uuid"></td>
+<td colspan="3"><input id="uuid" readonly></td>
 </tr>
 </table>
 
@@ -169,6 +169,30 @@ Buyer Signature
 document.querySelector('input[type=date]').value = new Date().toISOString().slice(0,10);
 document.getElementById("uuid").value = crypto.randomUUID();
 
+/* AUTO RUNNING NUMBER */
+function getYear(){ return new Date().getFullYear(); }
+
+function generateDocNo(prefix){
+  const year = getYear();
+  const key = prefix + "-" + year;
+  let run = localStorage.getItem(key);
+  run = run ? parseInt(run) + 1 : 1;
+  localStorage.setItem(key, run);
+  return `${prefix}-${year}-${String(run).padStart(3,'0')}`;
+}
+
+function setDoc(type){
+  const map = {
+    "INVOICE":"INV",
+    "QUOTATION":"QTN",
+    "DELIVERY ORDER":"DO",
+    "RECEIPT":"RCP"
+  };
+  document.getElementById("docTitle").innerText = type;
+  document.getElementById("docNo").value = generateDocNo(map[type]);
+}
+
+/* ITEMS */
 function addRow(){
 let t=document.getElementById("itemTable");
 let r=t.insertRow();
@@ -208,25 +232,24 @@ function generatePDF(){
 html2pdf().from(document.getElementById("invoice")).save();
 }
 
-function setDoc(t){ document.getElementById("docTitle").innerText=t; }
-
 function loadLogo(e){
 let r=new FileReader();
 r.onload=()=>document.getElementById("logo").src=r.result;
 r.readAsDataURL(e.target.files[0]);
 }
-
 function loadBuyerSign(e){
 let r=new FileReader();
 r.onload=()=>document.getElementById("buyerSign").src=r.result;
 r.readAsDataURL(e.target.files[0]);
 }
-
 function loadSellerSign(e){
 let r=new FileReader();
 r.onload=()=>document.getElementById("sellerSign").src=r.result;
 r.readAsDataURL(e.target.files[0]);
 }
+
+/* DEFAULT LOAD */
+window.onload = ()=>setDoc("INVOICE");
 </script>
 
 </body>
